@@ -1,0 +1,253 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  candidate
+  employer
+  recruiter
+  admin
+}
+
+enum JobStatus {
+  draft
+  pending
+  active
+  expired
+  rejected
+}
+
+enum ApplicationStatus {
+  Applied
+  UnderReview
+  Shortlisted
+  InterviewScheduled
+  Selected
+  Rejected
+}
+
+enum PipelineStage {
+  new
+  screening
+  shortlisted
+  interview
+  selected
+  offered
+  joined
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  phone        String?
+  passwordHash String?
+  name         String
+  role         UserRole
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  candidate    CandidateProfile?
+  employer     EmployerProfile?
+  recruiter    RecruiterProfile?
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+}
+
+model CandidateProfile {
+  id                 String         @id @default(cuid())
+  userId             String         @unique
+  user               User           @relation(fields: [userId], references: [id])
+  location           String?
+  currentTitle       String?
+  expectedSalary     Int?
+  noticePeriod       String?
+  linkedin           String?
+  completeness       Int            @default(0)
+  applications       Application[]
+  resumes            Resume[]
+  interviews         Interview[]
+  notes              CandidateNote[]
+  pipelineItems      PipelineItem[]
+  duplicateOfId      String?
+}
+
+model EmployerProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id])
+}
+
+model RecruiterProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Company {
+  id          String            @id @default(cuid())
+  slug        String            @unique
+  name        String
+  industry    String
+  location    String
+  website     String?
+  about       String?
+  verified    Boolean           @default(false)
+  jobs        Job[]
+  employers   EmployerProfile[]
+  clients     Client[]
+}
+
+model Job {
+  id             String        @id @default(cuid())
+  slug           String        @unique
+  title          String
+  companyId      String
+  company        Company       @relation(fields: [companyId], references: [id])
+  department     String
+  category       String
+  description    String
+  location       String
+  employmentType String
+  workMode       String
+  experienceMin  Int
+  experienceMax  Int
+  salaryMin      Int
+  salaryMax      Int
+  openings       Int
+  deadline       DateTime?
+  postedAt       DateTime      @default(now())
+  featured       Boolean       @default(false)
+  status         JobStatus     @default(pending)
+  applications   Application[]
+  interviews     Interview[]
+  assignments    RecruitmentAssignment[]
+  pipelineItems  PipelineItem[]
+
+  @@index([category, location, status])
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  jobId       String
+  job         Job               @relation(fields: [jobId], references: [id])
+  candidateId String
+  candidate   CandidateProfile  @relation(fields: [candidateId], references: [id])
+  status      ApplicationStatus @default(Applied)
+  appliedAt   DateTime          @default(now())
+  interviews  Interview[]
+
+  @@unique([jobId, candidateId])
+}
+
+model Resume {
+  id          String           @id @default(cuid())
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id])
+  fileName    String
+  storageKey  String
+  version     Int              @default(1)
+  createdAt   DateTime         @default(now())
+}
+
+model Skill {
+  id   String @id @default(cuid())
+  name String @unique
+}
+
+model Interview {
+  id            String           @id @default(cuid())
+  applicationId String?
+  application   Application?     @relation(fields: [applicationId], references: [id])
+  jobId         String
+  job           Job              @relation(fields: [jobId], references: [id])
+  candidateId   String
+  candidate     CandidateProfile @relation(fields: [candidateId], references: [id])
+  scheduledAt   DateTime
+  mode          String
+  location      String
+  interviewer   String
+  status        String
+}
+
+model Client {
+  id           String  @id @default(cuid())
+  companyId    String
+  company      Company @relation(fields: [companyId], references: [id])
+  accountOwner String
+  sla          String
+}
+
+model RecruitmentAssignment {
+  id          String @id @default(cuid())
+  jobId       String
+  job         Job    @relation(fields: [jobId], references: [id])
+  recruiterId String
+}
+
+model CandidateNote {
+  id          String           @id @default(cuid())
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id])
+  author      String
+  body        String
+  createdAt   DateTime         @default(now())
+}
+
+model PipelineItem {
+  id          String           @id @default(cuid())
+  candidateId String
+  candidate   CandidateProfile @relation(fields: [candidateId], references: [id])
+  jobId       String
+  job         Job              @relation(fields: [jobId], references: [id])
+  stage       PipelineStage
+  recruiterId String
+}
+
+model Placement {
+  id          String   @id @default(cuid())
+  candidateId String
+  jobId       String
+  joinedAt    DateTime
+  ctc         Int
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  companyId String
+  amount    Int
+  status    String
+  issuedAt  DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  meta      Json?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  action    String
+  entity    String
+  createdAt DateTime @default(now())
+}
