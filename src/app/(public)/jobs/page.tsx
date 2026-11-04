@@ -41,21 +41,21 @@ function JobsMarketplace() {
   }
 
   return (
-    <div className="container-shell py-14">
-      <p className="text-[12px] font-medium tracking-[0.16em] text-muted-foreground uppercase">Marketplace</p>
-      <h1 className="mt-2 font-heading text-4xl font-semibold tracking-tight sm:text-5xl">Find jobs across India</h1>
-      <p className="mt-3 max-w-2xl text-muted-foreground">Search live vacancies. Demo listings are clearly labelled.</p>
+    <div className="container-shell py-10 sm:py-14">
+      <p className="text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase sm:text-[12px]">Marketplace</p>
+      <h1 className="mt-2 font-heading text-[2rem] font-semibold tracking-tight sm:text-5xl">Find jobs across India</h1>
+      <p className="mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">Search live vacancies. Demo listings are clearly labelled.</p>
       <JobSearchBar
-        className="mt-10"
+        className="mt-8 sm:mt-10"
         values={filters}
         onChange={setFilters}
         onSubmit={() => persist()}
       />
-      <div className="mt-6 flex items-center justify-between text-sm text-muted-foreground">
+      <div className="mt-5 flex items-center justify-between gap-3 text-sm text-muted-foreground sm:mt-6">
         <p>{results.length} roles</p>
         <Button
           variant="ghost"
-          className="rounded-full"
+          className="h-9 shrink-0 rounded-full px-3"
           onClick={() => {
             const cleared = { q: "", location: "", experience: "", type: "" };
             setFilters(cleared);
@@ -66,7 +66,7 @@ function JobsMarketplace() {
         </Button>
       </div>
       {results.length ? (
-        <div className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-6 grid gap-4 sm:mt-8 sm:gap-6 md:grid-cols-2 xl:grid-cols-3">
           {results.map((job, index) => (
             <JobCard key={job.id} job={job} featured={index === 1} />
           ))}

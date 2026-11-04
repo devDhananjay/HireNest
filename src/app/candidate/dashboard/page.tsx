@@ -41,11 +41,11 @@ export default function CandidateDashboard() {
   }, [candidate, industry, jobs, mode, salary, search]);
 
   return (
-    <div className="pt-2">
-      <h1 className="font-heading text-[2.15rem] font-semibold tracking-tight sm:text-[2.6rem]">
+    <div className="pt-1 sm:pt-2">
+      <h1 className="font-heading text-[1.75rem] font-semibold tracking-tight sm:text-[2.6rem]">
         Welcome back, {session?.name?.split(" ")[0] ?? "there"}
       </h1>
-      <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
+      <p className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[13px] text-muted-foreground sm:mt-3 sm:text-sm">
         <span>{recommended.length} new job matches found for you today.</span>
         <span className="hidden h-1 w-1 rounded-full bg-muted-foreground/40 sm:inline-block" />
         <span>
@@ -57,7 +57,7 @@ export default function CandidateDashboard() {
         </span>
       </p>
       <JobSearchBar
-        className="mt-8"
+        className="mt-6 sm:mt-8"
         values={search}
         onChange={setSearch}
         onSubmit={() => {

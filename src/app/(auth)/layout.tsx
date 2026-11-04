@@ -17,8 +17,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </p>
         </div>
       </div>
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-md rounded-[2rem] bg-white p-8 shadow-soft sm:p-10">{children}</div>
+      <div className="flex flex-col items-center justify-center gap-6 p-5 sm:p-6">
+        <div className="w-full max-w-md lg:hidden">
+          <Logo />
+        </div>
+        <div className="w-full max-w-md rounded-[1.6rem] bg-white p-6 shadow-soft sm:rounded-[2rem] sm:p-10">{children}</div>
       </div>
     </div>
   );

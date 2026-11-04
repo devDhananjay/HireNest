@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Bell, Mail, Menu, X } from "lucide-react";
+import { ArrowUpRight, Bell, Mail, Menu, X } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { NAV_PUBLIC, ROLE_HOME } from "@/lib/constants";
@@ -83,14 +83,20 @@ export function MarketingHeader() {
             <>
               <Link
                 href={ROLE_HOME[session.role]}
-                className={cn("icon-orb size-11", light && "bg-white/12 text-white shadow-none")}
+                className={cn(
+                  "icon-orb size-11",
+                  light && "border-white/35 bg-white/18 text-white shadow-none backdrop-blur-md",
+                )}
                 aria-label="Messages"
               >
                 <Mail className="size-4" />
               </Link>
               <Link
                 href={ROLE_HOME[session.role]}
-                className={cn("icon-orb size-11", light && "bg-white/12 text-white shadow-none")}
+                className={cn(
+                  "icon-orb size-11",
+                  light && "border-white/35 bg-white/18 text-white shadow-none backdrop-blur-md",
+                )}
                 aria-label="Notifications"
               >
                 <Bell className="size-4" />
@@ -131,55 +137,125 @@ export function MarketingHeader() {
             </>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "size-11 rounded-full lg:hidden",
-            light ? "bg-white/12 text-white hover:bg-white/18 hover:text-white" : "bg-white shadow-soft",
-          )}
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-          aria-expanded={open}
-        >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </Button>
+        {!open ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "size-11 rounded-full lg:hidden",
+              light
+                ? "bg-white/12 text-white hover:bg-white/18 hover:text-white"
+                : "bg-white shadow-soft",
+            )}
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+            aria-expanded={false}
+          >
+            <Menu className="size-5" />
+          </Button>
+        ) : (
+          <span className="size-11 lg:hidden" aria-hidden />
+        )}
       </div>
 
       {open ? (
-        <div className="border-t border-black/5 bg-[#f3f4f8] lg:hidden">
-          <div className="container-shell flex max-h-[calc(100svh-4rem)] flex-col gap-2 overflow-y-auto py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            {NAV_PUBLIC.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 bg-[#070709]/42 backdrop-blur-[2px] animate-fade-up"
+            onClick={() => setOpen(false)}
+          />
+          <div className="drawer-panel absolute inset-x-0 top-0 bottom-0 flex h-[100svh] flex-col overflow-hidden bg-[#f3f4f8] shadow-lift">
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(70%_80%_at_50%_-20%,rgba(255,255,255,0.95),transparent)]" />
+            <div className="container-shell relative flex h-16 shrink-0 items-center justify-between sm:h-[4.35rem]">
+              <Logo />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-11 rounded-full bg-white shadow-soft"
                 onClick={() => setOpen(false)}
-                className={cn(
-                  "rounded-2xl px-4 py-3.5 text-[15px] font-medium transition",
-                  pathname === item.href ? "bg-black text-white" : "bg-white text-foreground shadow-soft",
-                )}
+                aria-label="Close menu"
+                aria-expanded={true}
               >
-                {item.label}
-              </Link>
-            ))}
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              <Link
-                href={session ? ROLE_HOME[session.role] : "/login"}
-                onClick={() => {
-                  setOpen(false);
-                  router.refresh();
-                }}
-                className="rounded-2xl border border-black/8 bg-white px-4 py-3.5 text-center text-[15px] font-medium"
+                <X className="size-5" />
+              </Button>
+            </div>
+
+            <div className="container-shell relative flex min-h-0 flex-1 flex-col">
+              <p className="mt-1 shrink-0 text-[11px] font-medium tracking-[0.2em] text-muted-foreground uppercase">Navigate</p>
+              <nav className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pr-0.5 pb-4">
+                {NAV_PUBLIC.map((item, index) => {
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      style={{ animationDelay: `${0.04 + index * 0.045}s` }}
+                      className={cn(
+                        "drawer-link group flex shrink-0 items-center gap-4 rounded-[1.35rem] px-4 py-3.5 transition duration-300",
+                        active
+                          ? "bg-black text-white shadow-[0_14px_28px_rgba(17,17,17,0.22)]"
+                          : "bg-white/90 text-foreground shadow-soft active:scale-[0.985]",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex size-10 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold tracking-tight",
+                          active ? "bg-white/12 text-white" : "bg-[#f3f4f8] text-muted-foreground",
+                        )}
+                      >
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <span className="min-w-0 flex-1 font-heading text-[1.15rem] font-semibold tracking-[-0.03em]">
+                        {item.label}
+                      </span>
+                      <ArrowUpRight
+                        className={cn(
+                          "size-4 transition duration-300",
+                          active ? "text-white/70" : "text-muted-foreground group-active:translate-x-0.5 group-active:-translate-y-0.5",
+                        )}
+                      />
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              <div
+                className="drawer-link shrink-0 pt-2 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
+                style={{ animationDelay: `${0.04 + NAV_PUBLIC.length * 0.045}s` }}
               >
-                {session ? "Dashboard" : "Login"}
-              </Link>
-              <Link
-                href={session ? ROLE_HOME[session.role] : "/register"}
-                onClick={() => setOpen(false)}
-                className="rounded-2xl bg-black px-4 py-3.5 text-center text-[15px] font-medium text-white"
-              >
-                {session ? "Open app" : "Get Started"}
-              </Link>
+                <div className="rounded-[1.6rem] bg-[#111111] p-5 text-white shadow-lift">
+                  <p className="text-[11px] font-medium tracking-[0.18em] text-white/45 uppercase">
+                    {session ? "Workspace" : "Get started"}
+                  </p>
+                  <p className="mt-2 max-w-[16rem] font-heading text-[1.2rem] leading-snug font-semibold tracking-[-0.03em]">
+                    {session
+                      ? `Continue as ${session.name.split(" ")[0]}`
+                      : "Hire smarter with HIREORA."}
+                  </p>
+                  <div className="mt-5 grid grid-cols-2 gap-2">
+                    <Link
+                      href={session ? ROLE_HOME[session.role] : "/login"}
+                      onClick={() => {
+                        setOpen(false);
+                        router.refresh();
+                      }}
+                      className="rounded-full bg-white/10 px-4 py-3.5 text-center text-[14px] font-medium text-white transition hover:bg-white/16"
+                    >
+                      {session ? "Dashboard" : "Login"}
+                    </Link>
+                    <Link
+                      href={session ? ROLE_HOME[session.role] : "/register"}
+                      onClick={() => setOpen(false)}
+                      className="rounded-full bg-white px-4 py-3.5 text-center text-[14px] font-medium text-black transition hover:bg-white/92"
+                    >
+                      {session ? "Open app" : "Get Started"}
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

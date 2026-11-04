@@ -1,17 +1,24 @@
+"use client";
+
 import Link from "next/link";
+import { ROLE_HOME } from "@/lib/constants";
+import { useDemo } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 export function Logo({
   className,
   light = false,
-  href = "/",
+  href,
 }: {
   className?: string;
   light?: boolean;
   href?: string;
 }) {
+  const { session } = useDemo();
+  const to = href ?? (session ? ROLE_HOME[session.role] : "/");
+
   return (
-    <Link href={href} className={cn("group flex min-w-0 items-center gap-2 sm:gap-2.5", className)}>
+    <Link href={to} className={cn("group flex min-w-0 items-center gap-2 sm:gap-2.5", className)}>
       <span
         className={cn(
           "relative flex size-9 shrink-0 items-center justify-center rounded-full text-[14px] font-bold tracking-tight transition-transform duration-300 group-hover:scale-[1.04] sm:size-10 sm:text-[15px]",
