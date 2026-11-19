@@ -1,12 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Plus, Trash2, UserRound } from "lucide-react";
+import {
+  Briefcase,
+  Building2,
+  Clock3,
+  FileText,
+  GraduationCap,
+  IndianRupee,
+  Link2,
+  MapPin,
+  Phone,
+  Plus,
+  Sparkles,
+  Trash2,
+  User,
+  UserRound,
+} from "lucide-react";
 import { IconOrb } from "@/components/brand/icon-orb";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { IconField, IconTextarea } from "@/components/ui/icon-field";
 import { useDemo } from "@/lib/store";
 import type { Education, Experience } from "@/lib/types";
 
@@ -70,7 +85,10 @@ export default function CandidateProfilePage() {
 
   return (
     <div>
-      <PageHeader title="Your profile" description="Keep this current so matching stays useful. Resumes stay private in this demo." />
+      <PageHeader
+        title="Your profile"
+        description="Keep education, experience, skills and resume current so fit scores stay useful. Resumes are stored privately and only shared in active hiring flows."
+      />
       <div className="grid items-start gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
         <aside className="space-y-5">
           <div className="rounded-[1.85rem] bg-black p-7 text-white shadow-lift">
@@ -133,29 +151,29 @@ export default function CandidateProfilePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Full name">
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" />
+              <IconField icon={User} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" />
             </Field>
             <Field label="Phone">
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone" />
+              <IconField icon={Phone} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Phone" />
             </Field>
             <Field label="Location">
-              <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Current location" />
+              <IconField icon={MapPin} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Current location" />
             </Field>
             <Field label="Current title">
-              <Input value={form.currentTitle} onChange={(e) => setForm({ ...form, currentTitle: e.target.value })} placeholder="Current designation" />
+              <IconField icon={Briefcase} value={form.currentTitle} onChange={(e) => setForm({ ...form, currentTitle: e.target.value })} placeholder="Current designation" />
             </Field>
             <Field label="Expected CTC (INR)">
-              <Input value={form.expectedSalary} onChange={(e) => setForm({ ...form, expectedSalary: e.target.value })} placeholder="Expected CTC (INR)" />
+              <IconField icon={IndianRupee} value={form.expectedSalary} onChange={(e) => setForm({ ...form, expectedSalary: e.target.value })} placeholder="Expected CTC (INR)" />
             </Field>
             <Field label="Notice period">
-              <Input value={form.noticePeriod} onChange={(e) => setForm({ ...form, noticePeriod: e.target.value })} placeholder="Notice period" />
+              <IconField icon={Clock3} value={form.noticePeriod} onChange={(e) => setForm({ ...form, noticePeriod: e.target.value })} placeholder="Notice period" />
             </Field>
           </div>
           <Field label="LinkedIn">
-            <Input value={form.linkedin} onChange={(e) => setForm({ ...form, linkedin: e.target.value })} placeholder="LinkedIn URL" />
+            <IconField icon={Link2} value={form.linkedin} onChange={(e) => setForm({ ...form, linkedin: e.target.value })} placeholder="LinkedIn URL" />
           </Field>
           <Field label="Skills">
-            <Textarea value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} placeholder="Skills, comma separated" />
+            <IconTextarea icon={Sparkles} value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} placeholder="Skills, comma separated" />
           </Field>
           <Field label="Resume (PDF/DOC/DOCX)">
             <Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => void readResume(e.target.files?.[0])} />
@@ -174,23 +192,23 @@ export default function CandidateProfilePage() {
             {form.education.length ? (
               form.education.map((row, index) => (
                 <div key={row.id} className="grid gap-3 rounded-2xl bg-[#f7f8fb] p-4 sm:grid-cols-2">
-                  <Input placeholder="School / college" value={row.school} onChange={(e) => {
+                  <IconField icon={GraduationCap} placeholder="School / college" value={row.school} onChange={(e) => {
                     const education = [...form.education];
                     education[index] = { ...row, school: e.target.value };
                     setForm({ ...form, education });
                   }} />
-                  <Input placeholder="Degree" value={row.degree} onChange={(e) => {
+                  <IconField icon={GraduationCap} placeholder="Degree" value={row.degree} onChange={(e) => {
                     const education = [...form.education];
                     education[index] = { ...row, degree: e.target.value };
                     setForm({ ...form, education });
                   }} />
-                  <Input placeholder="Field" value={row.field} onChange={(e) => {
+                  <IconField icon={Sparkles} placeholder="Field" value={row.field} onChange={(e) => {
                     const education = [...form.education];
                     education[index] = { ...row, field: e.target.value };
                     setForm({ ...form, education });
                   }} />
                   <div className="flex gap-2">
-                    <Input placeholder="Year" value={row.year} onChange={(e) => {
+                    <IconField icon={Clock3} placeholder="Year" value={row.year} onChange={(e) => {
                       const education = [...form.education];
                       education[index] = { ...row, year: e.target.value };
                       setForm({ ...form, education });
@@ -217,23 +235,23 @@ export default function CandidateProfilePage() {
               form.experience.map((row, index) => (
                 <div key={row.id} className="space-y-3 rounded-2xl bg-[#f7f8fb] p-4">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    <Input placeholder="Company" value={row.company} onChange={(e) => {
+                    <IconField icon={Building2} placeholder="Company" value={row.company} onChange={(e) => {
                       const experience = [...form.experience];
                       experience[index] = { ...row, company: e.target.value };
                       setForm({ ...form, experience });
                     }} />
-                    <Input placeholder="Title" value={row.title} onChange={(e) => {
+                    <IconField icon={Briefcase} placeholder="Title" value={row.title} onChange={(e) => {
                       const experience = [...form.experience];
                       experience[index] = { ...row, title: e.target.value };
                       setForm({ ...form, experience });
                     }} />
-                    <Input placeholder="Start (e.g. 2022)" value={row.start} onChange={(e) => {
+                    <IconField icon={Clock3} placeholder="Start (e.g. 2022)" value={row.start} onChange={(e) => {
                       const experience = [...form.experience];
                       experience[index] = { ...row, start: e.target.value };
                       setForm({ ...form, experience });
                     }} />
                     <div className="flex gap-2">
-                      <Input placeholder="End (or Present)" value={row.end} onChange={(e) => {
+                      <IconField icon={Clock3} placeholder="End (or Present)" value={row.end} onChange={(e) => {
                         const experience = [...form.experience];
                         experience[index] = { ...row, end: e.target.value };
                         setForm({ ...form, experience });
@@ -243,7 +261,7 @@ export default function CandidateProfilePage() {
                       </Button>
                     </div>
                   </div>
-                  <Textarea placeholder="Summary" value={row.summary} onChange={(e) => {
+                  <IconTextarea icon={FileText} placeholder="Summary" value={row.summary} onChange={(e) => {
                     const experience = [...form.experience];
                     experience[index] = { ...row, summary: e.target.value };
                     setForm({ ...form, experience });

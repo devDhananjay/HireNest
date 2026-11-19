@@ -22,6 +22,8 @@ import {
   Mail,
   Search,
   ChevronRight,
+  AudioLines,
+  MessageCircle,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -40,6 +42,7 @@ const nav: Record<UserRole, { href: string; label: string; icon: typeof LayoutDa
     { href: "/candidate/applications", label: "Applications", icon: ClipboardList },
     { href: "/candidate/saved-jobs", label: "Saved jobs", icon: Bookmark },
     { href: "/candidate/interviews", label: "Interviews", icon: Calendar },
+    { href: "/candidate/voice-screens", label: "Voice screens", icon: AudioLines },
   ],
   employer: [
     { href: "/employer/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -55,6 +58,7 @@ const nav: Record<UserRole, { href: string; label: string; icon: typeof LayoutDa
     { href: "/recruiter/jobs", label: "Jobs", icon: Briefcase },
     { href: "/recruiter/pipeline", label: "Pipeline", icon: KanbanSquare },
     { href: "/recruiter/interviews", label: "Interviews", icon: Calendar },
+    { href: "/recruiter/voice-screens", label: "Voice screens", icon: AudioLines },
     { href: "/recruiter/clients", label: "Clients", icon: Building2 },
   ],
   admin: [
@@ -67,6 +71,7 @@ const nav: Record<UserRole, { href: string; label: string; icon: typeof LayoutDa
     { href: "/admin/articles", label: "Articles", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: BarChart3 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/whatsapp", label: "WhatsApp", icon: MessageCircle },
   ],
 };
 

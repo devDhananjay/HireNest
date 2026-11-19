@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Building2 } from "lucide-react";
+import { Building2, Factory, Globe, MapPin, Users } from "lucide-react";
 import { IconOrb } from "@/components/brand/icon-orb";
 import { CompanyMark } from "@/components/jobs/company-mark";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { IconField, IconTextarea } from "@/components/ui/icon-field";
 import { useDemo } from "@/lib/store";
 
 const LOGO_COLORS = ["#111111", "#101D35", "#3157D5", "#F4A340", "#0F766E", "#7C2D12"];
@@ -43,7 +43,10 @@ export default function CompanyProfilePage() {
 
   return (
     <div>
-      <PageHeader title="Company profile" description="Verification is managed by HIREORA admin. Edits stay in this demo browser." />
+      <PageHeader
+        title="Company profile"
+        description="Update how candidates see your company. Verification is managed by HIREORA admin before listings carry a verified badge."
+      />
       <div className="grid items-start gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="space-y-5">
           <div className="rounded-[1.85rem] bg-black p-7 text-white shadow-lift">
@@ -75,23 +78,23 @@ export default function CompanyProfilePage() {
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Company name">
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <IconField icon={Building2} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </Field>
             <Field label="Industry">
-              <Input value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} />
+              <IconField icon={Factory} value={form.industry} onChange={(e) => setForm({ ...form, industry: e.target.value })} />
             </Field>
             <Field label="Location">
-              <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
+              <IconField icon={MapPin} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
             </Field>
             <Field label="Employees">
-              <Input value={form.employees} onChange={(e) => setForm({ ...form, employees: e.target.value })} />
+              <IconField icon={Users} value={form.employees} onChange={(e) => setForm({ ...form, employees: e.target.value })} />
             </Field>
           </div>
           <Field label="Website">
-            <Input value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
+            <IconField icon={Globe} value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} />
           </Field>
           <Field label="About">
-            <Textarea value={form.about} onChange={(e) => setForm({ ...form, about: e.target.value })} />
+            <IconTextarea icon={Building2} value={form.about} onChange={(e) => setForm({ ...form, about: e.target.value })} />
           </Field>
           <Field label="Logo mark colour">
             <div className="flex flex-wrap items-center gap-2">
@@ -115,7 +118,7 @@ export default function CompanyProfilePage() {
                 className="h-11 w-16 cursor-pointer p-1"
               />
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Demo uses a colour mark. Production will support private logo object storage.</p>
+            <p className="mt-2 text-xs text-muted-foreground">Brand mark colour for your company tile. Logo upload lands with private object storage.</p>
           </Field>
           <Button type="submit" className="h-11 rounded-full">
             Save company profile

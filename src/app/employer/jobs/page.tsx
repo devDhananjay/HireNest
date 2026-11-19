@@ -21,7 +21,7 @@ export default function EmployerJobsPage() {
     <div>
       <PageHeader
         title="Jobs"
-        description="Live, pending and expired vacancies for your company."
+        description="Every vacancy for your company — live, pending admin approval, expired or rejected — with quick links to create and edit."
         actions={
           <Link href="/employer/jobs/create" className={btnPrimary}>
             Create job
@@ -38,29 +38,68 @@ export default function EmployerJobsPage() {
           const apps = applications.filter((app) => app.jobId === job.id).length;
           const featured = index === 0 && job.status === "active";
           return (
-            <article key={job.id} className={featured ? "rounded-[1.85rem] bg-black p-6 text-white shadow-lift" : "rounded-[1.85rem] bg-white p-6 shadow-soft"}>
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="font-heading text-xl font-semibold tracking-tight">{job.title}</h2>
-                  <p className={featured ? "mt-1 text-sm text-white/55" : "mt-1 text-sm text-muted-foreground"}>
-                    {job.location} · {job.workMode} · {experienceRange(job.experienceMin, job.experienceMax)}
-                  </p>
-                  <p className={featured ? "mt-1 text-sm text-white/55" : "mt-1 text-sm text-muted-foreground"}>{salaryRange(job.salaryMin, job.salaryMax)}</p>
+            <article
+              key={job.id}
+              className={
+                featured
+                  ? "group relative rounded-[1.85rem] bg-black p-6 text-white shadow-lift"
+                  : "group relative rounded-[1.85rem] bg-white p-6 shadow-soft"
+              }
+            >
+              <Link
+                href={`/jobs/${job.slug}`}
+                className="absolute inset-0 z-0 rounded-[inherit]"
+                aria-label={`View ${job.title}`}
+              />
+              <div className="relative z-10 pointer-events-none">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="font-heading text-xl font-semibold tracking-tight">{job.title}</h2>
+                    <p className={featured ? "mt-1 text-sm text-white/55" : "mt-1 text-sm text-muted-foreground"}>
+                      {job.location} · {job.workMode} · {experienceRange(job.experienceMin, job.experienceMax)}
+                    </p>
+                    <p className={featured ? "mt-1 text-sm text-white/55" : "mt-1 text-sm text-muted-foreground"}>
+                      {salaryRange(job.salaryMin, job.salaryMax)}
+                    </p>
+                  </div>
+                  <Badge
+                    variant={featured ? "secondary" : "outline"}
+                    className={featured ? "border-0 bg-white/12 text-white capitalize" : "capitalize"}
+                  >
+                    {job.status}
+                  </Badge>
                 </div>
-                <Badge variant={featured ? "secondary" : "outline"} className={featured ? "border-0 bg-white/12 text-white capitalize" : "capitalize"}>
-                  {job.status}
-                </Badge>
+                <p className={featured ? "mt-5 text-sm text-white/55" : "mt-5 text-sm text-muted-foreground"}>
+                  {job.openings} openings · {apps} applications
+                </p>
               </div>
-              <p className={featured ? "mt-5 text-sm text-white/55" : "mt-5 text-sm text-muted-foreground"}>
-                {job.openings} openings · {apps} applications
-              </p>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="relative z-20 mt-5 flex flex-wrap gap-2">
                 {job.status === "active" ? (
-                  <Button variant="outline" className={featured ? "rounded-full border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white" : "rounded-full"} onClick={() => updateJob(job.id, { status: "expired" })}>
+                  <Button
+                    variant="outline"
+                    className={
+                      featured
+                        ? "rounded-full border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                        : "rounded-full"
+                    }
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      updateJob(job.id, { status: "expired" });
+                    }}
+                  >
                     Expire
                   </Button>
                 ) : null}
-                <Button variant="destructive" className="rounded-full" onClick={() => deleteJob(job.id)}>
+                <Button
+                  variant="destructive"
+                  className="rounded-full"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    deleteJob(job.id);
+                  }}
+                >
                   Delete
                 </Button>
               </div>

@@ -20,7 +20,10 @@ export default function AdminDashboard() {
   const placements = pipeline.filter((p) => p.stage === "joined" || p.stage === "offered" || p.stage === "selected").length;
   return (
     <div>
-      <PageHeader title="Platform control" description="Demo analytics across candidates, employers and mandates." />
+      <PageHeader
+        title="Platform control"
+        description="Live counts across candidates, employers, pending jobs and leads — plus quick links into moderation and reports."
+      />
       <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Candidates" value={candidates.length} icon={Users} />
         <StatCard label="Employers" value={companies.length} icon={Building2} tone="royal" />

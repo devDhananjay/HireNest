@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <p className="text-[12px] font-medium tracking-[0.18em] text-white/45 uppercase">HIREORA</p>
           <h1 className="mt-3 font-heading text-5xl leading-[1.08] font-semibold">Connecting talent. Creating possibilities.</h1>
           <p className="mt-5 text-sm leading-7 text-white/65">
-            {BRAND.tagline} Demo access is role-based and uses sample Indian-market data.
+            {BRAND.tagline} Role-based access for candidates, employers and consultants.
           </p>
         </div>
       </div>

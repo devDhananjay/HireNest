@@ -2,13 +2,23 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FileText } from "lucide-react";
+import {
+  AlignLeft,
+  Briefcase,
+  Building2,
+  CalendarDays,
+  CheckSquare,
+  FileText,
+  IndianRupee,
+  ListChecks,
+  MapPin,
+  Sparkles,
+  Users,
+} from "lucide-react";
 import { IconOrb } from "@/components/brand/icon-orb";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { NativeSelect } from "@/components/ui/native-select";
+import { IconField, IconSelect, IconTextarea } from "@/components/ui/icon-field";
 import { CATEGORIES, LOCATIONS } from "@/lib/constants";
 import { useDemo } from "@/lib/store";
 import type { EmploymentType, WorkMode } from "@/lib/types";
@@ -45,7 +55,10 @@ export default function CreateJobPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Post a job" description="New vacancies go to admin for approval in this demo." />
+      <PageHeader
+        title="Post a job"
+        description="Add a clear title, responsibilities and requirements. New vacancies go to HIREORA admin for approval before they go live."
+      />
       <form
         className="space-y-5 rounded-[1.85rem] bg-white p-7 shadow-soft"
         onSubmit={(e) => {
@@ -83,79 +96,81 @@ export default function CreateJobPage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Job title">
-            <Input required placeholder="Senior Product Designer" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+            <IconField icon={Briefcase} required placeholder="Senior Product Designer" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
           </Field>
           <Field label="Department">
-            <Input required placeholder="Design" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} />
+            <IconField icon={Building2} required placeholder="Design" value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} />
           </Field>
           <Field label="Category">
-            <NativeSelect value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+            <IconSelect icon={Sparkles} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
               {CATEGORIES.map((c) => (
                 <option key={c.slug}>{c.name}</option>
               ))}
-            </NativeSelect>
+            </IconSelect>
           </Field>
           <Field label="Location">
-            <NativeSelect value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
+            <IconSelect icon={MapPin} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}>
               {LOCATIONS.map((l) => (
                 <option key={l}>{l}</option>
               ))}
-            </NativeSelect>
+            </IconSelect>
           </Field>
         </div>
         <Field label="Job description">
-          <Textarea required placeholder="What this person will own" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+          <IconTextarea icon={AlignLeft} required placeholder="What this person will own" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         </Field>
         <Field label="Responsibilities (one per line)">
-          <Textarea
+          <IconTextarea
+            icon={ListChecks}
             placeholder={"Ship weekly product improvements\nPartner with design and engineering\nMentor junior teammates"}
             value={form.responsibilities}
             onChange={(e) => setForm({ ...form, responsibilities: e.target.value })}
           />
         </Field>
         <Field label="Requirements (one per line)">
-          <Textarea
+          <IconTextarea
+            icon={CheckSquare}
             placeholder={"3+ years in a similar role\nStrong written communication\nPortfolio or case studies"}
             value={form.requirements}
             onChange={(e) => setForm({ ...form, requirements: e.target.value })}
           />
         </Field>
         <Field label="Required skills">
-          <Input placeholder="Required skills" value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
+          <IconField icon={Sparkles} placeholder="Required skills" value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Employment type">
-            <NativeSelect value={form.employmentType} onChange={(e) => setForm({ ...form, employmentType: e.target.value as EmploymentType })}>
+            <IconSelect icon={Briefcase} value={form.employmentType} onChange={(e) => setForm({ ...form, employmentType: e.target.value as EmploymentType })}>
               <option>Full-time</option>
               <option>Part-time</option>
               <option>Contract</option>
               <option>Internship</option>
-            </NativeSelect>
+            </IconSelect>
           </Field>
           <Field label="Work mode">
-            <NativeSelect value={form.workMode} onChange={(e) => setForm({ ...form, workMode: e.target.value as WorkMode })}>
+            <IconSelect icon={Building2} value={form.workMode} onChange={(e) => setForm({ ...form, workMode: e.target.value as WorkMode })}>
               <option>On-site</option>
               <option>Hybrid</option>
               <option>Remote</option>
-            </NativeSelect>
+            </IconSelect>
           </Field>
           <Field label="Experience min (years)">
-            <Input type="number" value={form.experienceMin} onChange={(e) => setForm({ ...form, experienceMin: Number(e.target.value) })} />
+            <IconField icon={Users} type="number" value={form.experienceMin} onChange={(e) => setForm({ ...form, experienceMin: Number(e.target.value) })} />
           </Field>
           <Field label="Experience max (years)">
-            <Input type="number" value={form.experienceMax} onChange={(e) => setForm({ ...form, experienceMax: Number(e.target.value) })} />
+            <IconField icon={Users} type="number" value={form.experienceMax} onChange={(e) => setForm({ ...form, experienceMax: Number(e.target.value) })} />
           </Field>
           <Field label="Salary min (INR)">
-            <Input type="number" value={form.salaryMin} onChange={(e) => setForm({ ...form, salaryMin: Number(e.target.value) })} />
+            <IconField icon={IndianRupee} type="number" value={form.salaryMin} onChange={(e) => setForm({ ...form, salaryMin: Number(e.target.value) })} />
           </Field>
           <Field label="Salary max (INR)">
-            <Input type="number" value={form.salaryMax} onChange={(e) => setForm({ ...form, salaryMax: Number(e.target.value) })} />
+            <IconField icon={IndianRupee} type="number" value={form.salaryMax} onChange={(e) => setForm({ ...form, salaryMax: Number(e.target.value) })} />
           </Field>
           <Field label="Openings">
-            <Input type="number" value={form.openings} onChange={(e) => setForm({ ...form, openings: Number(e.target.value) })} />
+            <IconField icon={Users} type="number" value={form.openings} onChange={(e) => setForm({ ...form, openings: Number(e.target.value) })} />
           </Field>
           <Field label="Deadline">
-            <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
+            <IconField icon={CalendarDays} type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
           </Field>
         </div>
         <Button type="submit" className="h-11 rounded-full">

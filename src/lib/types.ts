@@ -142,15 +142,36 @@ export type Lead = {
   location: string;
   createdAt: string;
   status: "New" | "In Review" | "Assigned" | "Closed";
+  source?: string;
+  qualifyScore?: number | null;
+  qualifyLabel?: "Hot" | "Warm" | "Cold" | string | null;
+  qualifyNotes?: string | null;
 };
 
 export type Inquiry = {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   topic: string;
   message: string;
+  source?: string;
   createdAt: string;
+};
+
+export type InterviewSlot = {
+  id: string;
+  jobId: string;
+  companyId: string;
+  applicationId?: string | null;
+  candidateId?: string | null;
+  startsAt: string;
+  endsAt: string;
+  mode: string;
+  location: string;
+  interviewer: string;
+  status: "open" | "booked" | "cancelled" | string;
+  jobTitle?: string;
 };
 
 export type Client = {
@@ -202,5 +223,4 @@ export type Testimonial = {
   name: string;
   role: string;
   kind: "candidate" | "employer";
-  demo: true;
 };

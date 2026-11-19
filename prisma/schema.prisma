@@ -81,11 +81,13 @@ model CandidateProfile {
   tags               String[] @default([])
   duplicateOfId      String?
 
-  applications  Application[]
-  resumes       Resume[]
-  interviews    Interview[]
-  notes         CandidateNote[]
-  pipelineItems PipelineItem[]
+  applications   Application[]
+  resumes        Resume[]
+  interviews     Interview[]
+  notes          CandidateNote[]
+  pipelineItems  PipelineItem[]
+  voiceScreens   VoiceScreen[]
+  whatsappMessages WhatsAppMessage[]
 }
 
 model EmployerProfile {
@@ -147,11 +149,13 @@ model Job {
   featured         Boolean   @default(false)
   status           JobStatus @default(pending)
 
-  applications  Application[]
-  interviews    Interview[]
-  assignments   RecruitmentAssignment[]
-  pipelineItems PipelineItem[]
-  savedBy       SavedJob[]
+  applications    Application[]
+  interviews      Interview[]
+  assignments     RecruitmentAssignment[]
+  pipelineItems   PipelineItem[]
+  savedBy         SavedJob[]
+  voiceScreens    VoiceScreen[]
+  interviewSlots  InterviewSlot[]
 
   @@index([category, location, status])
 }
@@ -244,25 +248,73 @@ model SavedJob {
 }
 
 model Lead {
-  id          String   @id @default(cuid())
-  companyName String
-  contactName String
-  email       String
-  phone       String
-  hiringNeed  String
-  roles       String   @default("")
-  location    String   @default("")
-  status      String   @default("New")
-  createdAt   DateTime @default(now())
+  id           String   @id @default(cuid())
+  companyName  String
+  contactName  String
+  email        String
+  phone        String
+  hiringNeed   String
+  roles        String   @default("")
+  location     String   @default("")
+  status       String   @default("New")
+  source       String   @default("web")
+  qualifyScore Int?
+  qualifyLabel String?
+  qualifyNotes String?
+  createdAt    DateTime @default(now())
 }
 
 model Inquiry {
   id        String   @id @default(cuid())
   name      String
   email     String
+  phone     String?
   topic     String   @default("")
   message   String
+  source    String   @default("web")
   createdAt DateTime @default(now())
+}
+
+model FollowUpTask {
+  id          String    @id @default(cuid())
+  kind        String
+  channel     String    @default("whatsapp")
+  status      String    @default("pending")
+  dueAt       DateTime
+  sentAt      DateTime?
+  toPhone     String?
+  toEmail     String?
+  subject     String?
+  body        String
+  relatedType String?
+  relatedId   String?
+  candidateId String?
+  meta        Json?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, dueAt])
+  @@index([relatedType, relatedId])
+}
+
+model InterviewSlot {
+  id                String    @id @default(cuid())
+  jobId             String
+  job               Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  companyId         String
+  applicationId     String?
+  candidateId       String?
+  startsAt          DateTime
+  endsAt            DateTime
+  mode              String    @default("Video")
+  location          String    @default("Google Meet")
+  interviewer       String    @default("")
+  status            String    @default("open")
+  bookedInterviewId String?
+  createdAt         DateTime  @default(now())
+
+  @@index([jobId, status])
+  @@index([candidateId, status])
+  @@index([applicationId, status])
 }
 
 model Placement {
@@ -301,6 +353,8 @@ model PlatformSettings {
   id                 String  @id @default("default")
   emailUpdates       Boolean @default(true)
   whatsappReminders  Boolean @default(false)
+  autoFollowUps      Boolean @default(true)
+  dailyDigest        Boolean @default(true)
 }
 
 model OtpChallenge {
@@ -358,4 +412,78 @@ model Article {
   published   Boolean  @default(true)
   publishedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+enum WhatsAppStatus {
+  queued
+  sent
+  delivered
+  read
+  failed
+  skipped
+}
+
+model WhatsAppMessage {
+  id           String         @id @default(cuid())
+  toPhone      String
+  template     String?
+  body         String
+  status       WhatsAppStatus @default(queued)
+  provider     String         @default("console")
+  providerId   String?
+  error        String?
+  candidateId  String?
+  candidate    CandidateProfile? @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  relatedType  String?
+  relatedId    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([toPhone, createdAt])
+  @@index([relatedType, relatedId])
+}
+
+enum VoiceScreenStatus {
+  pending
+  in_progress
+  submitted
+  scored
+  cancelled
+}
+
+model VoiceScreen {
+  id            String            @id @default(cuid())
+  jobId         String
+  job           Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId   String
+  candidate     CandidateProfile  @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  createdById   String
+  status        VoiceScreenStatus @default(pending)
+  questions     Json              @default("[]")
+  overallScore  Int?
+  summary       String?
+  inviteToken   String            @unique @default(cuid())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  completedAt   DateTime?
+
+  answers VoiceAnswer[]
+
+  @@index([candidateId, status])
+  @@index([jobId, status])
+}
+
+model VoiceAnswer {
+  id            String      @id @default(cuid())
+  voiceScreenId String
+  voiceScreen   VoiceScreen @relation(fields: [voiceScreenId], references: [id], onDelete: Cascade)
+  questionIndex Int
+  question      String
+  audioKey      String?
+  transcript    String      @default("")
+  score         Int?
+  feedback      String?
+  createdAt     DateTime    @default(now())
+
+  @@unique([voiceScreenId, questionIndex])
 }

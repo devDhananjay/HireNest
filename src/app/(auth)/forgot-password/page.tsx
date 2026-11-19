@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { KeyRound, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { IconField } from "@/components/ui/icon-field";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -71,14 +72,22 @@ export default function ForgotPasswordPage() {
       <form className="space-y-3" onSubmit={resetPassword}>
         <h1 className="font-heading text-3xl font-semibold">Choose a new password</h1>
         <p className="text-sm leading-6 text-muted-foreground">{hint}</p>
-        <Input required value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="OTP code" className="h-12 tracking-[0.4em]" />
-        <Input
+        <IconField
+          icon={ShieldCheck}
+          required
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          placeholder="OTP code"
+          inputClassName="h-12 tracking-[0.4em]"
+        />
+        <IconField
+          icon={LockKeyhole}
           required
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="New password"
-          className="h-12"
+          inputClassName="h-12"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button type="submit" className="h-12 w-full rounded-full" disabled={loading}>
@@ -97,10 +106,23 @@ export default function ForgotPasswordPage() {
       <p className="text-sm leading-6 text-muted-foreground">
         Enter your email. We send an OTP via Resend when configured, otherwise a demo code is shown.
       </p>
-      <Input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-12" />
+      <IconField
+        icon={Mail}
+        required
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Email"
+        inputClassName="h-12"
+      />
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
       <Button type="submit" className="h-12 w-full rounded-full" disabled={loading}>
-        {loading ? "Sending…" : "Send reset code"}
+        {loading ? "Sending…" : (
+          <>
+            <KeyRound className="size-4" />
+            Send reset code
+          </>
+        )}
       </Button>
       <Link href="/login" className="inline-block text-sm hover:underline">
         Back to login

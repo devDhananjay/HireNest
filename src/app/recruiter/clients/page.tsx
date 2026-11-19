@@ -56,13 +56,33 @@ export default function RecruiterClientsPage() {
                 <div>
                   <h3 className="font-heading font-semibold">{lead.companyName}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {lead.roles} · {lead.location}
+                    {lead.roles || "Roles TBD"} · {lead.location || "Location TBD"}
+                    {lead.source ? ` · via ${lead.source}` : ""}
                   </p>
                 </div>
               </div>
-              <Badge>{lead.status}</Badge>
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {lead.qualifyLabel ? (
+                  <Badge
+                    className={
+                      lead.qualifyLabel === "Hot"
+                        ? "bg-black text-white"
+                        : lead.qualifyLabel === "Warm"
+                          ? "bg-[#e8eaef] text-foreground"
+                          : undefined
+                    }
+                  >
+                    {lead.qualifyLabel}
+                    {typeof lead.qualifyScore === "number" ? ` · ${lead.qualifyScore}` : ""}
+                  </Badge>
+                ) : null}
+                <Badge>{lead.status}</Badge>
+              </div>
             </div>
             <p className="mt-4 text-sm leading-6">{lead.hiringNeed}</p>
+            {lead.qualifyNotes ? (
+              <p className="mt-2 text-xs text-muted-foreground">AI qualify: {lead.qualifyNotes}</p>
+            ) : null}
             <NativeSelect
               className="mt-4 h-11 w-48 rounded-full"
               value={lead.status}

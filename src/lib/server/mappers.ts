@@ -209,6 +209,10 @@ export function mapLead(lead: {
   location: string;
   createdAt: Date;
   status: string;
+  source?: string | null;
+  qualifyScore?: number | null;
+  qualifyLabel?: string | null;
+  qualifyNotes?: string | null;
 }): Lead {
   return {
     id: lead.id,
@@ -221,6 +225,10 @@ export function mapLead(lead: {
     location: lead.location,
     createdAt: lead.createdAt.toISOString(),
     status: lead.status as Lead["status"],
+    source: lead.source ?? "web",
+    qualifyScore: lead.qualifyScore,
+    qualifyLabel: lead.qualifyLabel,
+    qualifyNotes: lead.qualifyNotes,
   };
 }
 
@@ -228,16 +236,20 @@ export function mapInquiry(inquiry: {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   topic: string;
   message: string;
+  source?: string | null;
   createdAt: Date;
 }): Inquiry {
   return {
     id: inquiry.id,
     name: inquiry.name,
     email: inquiry.email,
+    phone: inquiry.phone,
     topic: inquiry.topic,
     message: inquiry.message,
+    source: inquiry.source ?? "web",
     createdAt: inquiry.createdAt.toISOString(),
   };
 }

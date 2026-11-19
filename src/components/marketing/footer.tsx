@@ -10,7 +10,9 @@ const columns = [
       { href: "/jobs", label: "Find Jobs" },
       { href: "/companies", label: "Browse Companies" },
       { href: "/for-candidates", label: "For Candidates" },
+      { href: "/talent-community", label: "Talent community" },
       { href: "/for-employers", label: "For Employers" },
+      { href: "/placement-dossiers", label: "Placement dossiers" },
       { href: "/career-resources", label: "Career Resources" },
     ],
   },
@@ -18,8 +20,9 @@ const columns = [
     title: "Employers",
     links: [
       { href: "/recruitment-services", label: "Recruitment Services" },
-      { href: "/services/permanent-staffing", label: "Permanent Staffing" },
-      { href: "/services/bulk-hiring", label: "Bulk Hiring" },
+      { href: "/services/ai-hiring-os", label: "AI Hiring OS" },
+      { href: "/engagement", label: "Engagement & fees" },
+      { href: "/trust", label: "Trust & confidentiality" },
       { href: "/services/executive-search", label: "Executive Search" },
       { href: "/contact", label: "Request a Recruiter" },
     ],
@@ -34,7 +37,9 @@ export function MarketingFooter() {
           <div className="grid gap-8 sm:gap-10 md:grid-cols-2 lg:grid-cols-4">
             <div>
               <Logo />
-              <p className="mt-4 max-w-xs text-sm leading-7 text-muted-foreground sm:mt-5">{BRAND.tagline}</p>
+              <p className="mt-4 whitespace-nowrap text-sm leading-7 text-muted-foreground sm:mt-5">
+                {BRAND.tagline}
+              </p>
             </div>
             {columns.map((column) => (
               <div key={column.title}>
@@ -78,7 +83,10 @@ export function MarketingFooter() {
                 <MapPin className="size-4" /> Bengaluru
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <Link href="/trust" className="hover:text-foreground">
+                Trust
+              </Link>
               <Link href="/privacy-policy" className="hover:text-foreground">
                 Privacy policy
               </Link>

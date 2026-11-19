@@ -78,7 +78,15 @@ export default function CompanyDetailPage({ params }: { params: Promise<{ slug: 
           </div>
         ) : (
           <div className="mt-6">
-            <EmptyState title="No open roles right now" description="Check back soon or browse the full job board." />
+            <EmptyState
+              title="No open roles right now"
+              description="Check back soon or browse the full job board."
+              action={
+                <Link href="/jobs" className={btnPrimary}>
+                  Browse jobs
+                </Link>
+              }
+            />
           </div>
         )}
       </div>

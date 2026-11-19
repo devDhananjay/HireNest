@@ -39,17 +39,34 @@ export async function POST(request: Request) {
     },
   });
 
-  const skills = Array.from(new Set([...(candidate.skills ?? []), ...parsed.skills])).slice(0, 24);
+  if (!parsed.rawTextLength && !parsed.skills.length) {
+    return NextResponse.json(
+      {
+        error: "Could not read text from this PDF. Use a text-based PDF (not a scanned image) and try again.",
+        parsed,
+      },
+      { status: 422 },
+    );
+  }
+
+  // Prefer freshly parsed resume skills; fall back to existing profile skills only if parse found none.
+  const skills = Array.from(
+    new Set(parsed.skills?.length ? parsed.skills : (candidate.skills ?? [])),
+  ).slice(0, 40);
   const education =
     parsed.education.length > 0 ? parsed.education : ((candidate.education as Education[]) ?? []);
   const experience =
     parsed.experience.length > 0 ? parsed.experience : ((candidate.experience as Experience[]) ?? []);
   const currentTitle = parsed.currentTitle || candidate.currentTitle;
   const location = parsed.location || candidate.location;
+  const phone = parsed.phone || candidate.phone;
+  const preferredLocations = Array.from(
+    new Set([...(candidate.preferredLocations ?? []), ...(location ? [location] : [])].filter(Boolean)),
+  );
 
   const completeness = profileCompleteness({
     name: candidate.user.name,
-    phone: candidate.phone,
+    phone,
     location,
     currentTitle,
     expectedSalary: candidate.expectedSalary,
@@ -70,8 +87,17 @@ export async function POST(request: Request) {
       experience,
       currentTitle,
       location,
+      phone,
+      preferredLocations,
       completeness,
-      tags: Array.from(new Set([...(candidate.tags ?? []), "Parsed"])),
+      tags: Array.from(
+        new Set([
+          ...(candidate.tags ?? []).filter((tag) => !tag.startsWith("years:")),
+          "Parsed",
+          parsed.provider === "openai" ? "AI-parsed" : "Heuristic-parsed",
+          ...(parsed.yearsExperience ? [`years:${parsed.yearsExperience}`] : []),
+        ]),
+      ),
     },
     include: { user: true },
   });
@@ -87,6 +113,11 @@ export async function POST(request: Request) {
       summary: parsed.summary,
       currentTitle: parsed.currentTitle,
       location: parsed.location,
+      phone: parsed.phone,
+      yearsExperience: parsed.yearsExperience,
+      experienceCount: parsed.experience.length,
+      educationCount: parsed.education.length,
+      rawTextLength: parsed.rawTextLength,
     },
   });
 }

@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Search, Users } from "lucide-react";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { CompanyMark } from "@/components/jobs/company-mark";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { LOCATIONS } from "@/lib/constants";
@@ -33,7 +35,7 @@ export default function EmployerCandidatesPage() {
 
   return (
     <div>
-      <PageHeader title="Candidate search" description="Only authorised resume metadata is shown in this demo." />
+      <PageHeader title="Candidate search" description="Authorised resume metadata for roles you own — discretion by default." />
       <div className="mb-8 max-w-sm">
         <StatCard label="Visible talent" value={filtered.length} icon={Users} />
       </div>
@@ -87,7 +89,26 @@ export default function EmployerCandidatesPage() {
         })}
       </div>
       ) : (
-        <EmptyState title="No candidates match" description="Try another skill, city, or lower the experience filter." />
+        <EmptyState
+          title="No candidates match"
+          description="Try another skill, city, or lower the experience filter — or brief a consultant for a retained shortlist."
+          action={
+            <>
+              <Button
+                className="h-10 rounded-full px-4"
+                onClick={() => setFilters({ skill: "", location: "", minExp: "" })}
+              >
+                Clear filters
+              </Button>
+              <Link
+                href="/contact"
+                className="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-medium"
+              >
+                Brief a recruiter
+              </Link>
+            </>
+          }
+        />
       )}
     </div>
   );

@@ -193,7 +193,21 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         });
       },
       addLead: (lead) => {
-        void run("addLead", lead, "Hiring request received. A consultant will follow up.");
+        void (async () => {
+          const res = await fetch("/api/actions", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "addLead", payload: lead }),
+          });
+          const data = await res.json().catch(() => ({}));
+          await refresh();
+          if (!res.ok) {
+            toast.error(data.error || "Could not submit hiring request");
+            return;
+          }
+          const label = data.qualify?.label ? ` · ${data.qualify.label} lead` : "";
+          toast.success(`Hiring request received${label}. A consultant will follow up.`);
+        })();
       },
       addInquiry: (inquiry) => {
         void run("addInquiry", inquiry, "Message sent. We will reply within one business day.");
@@ -261,7 +275,13 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok) throw new Error(data.error || "Upload failed");
         await refresh();
         const provider = data.parsed?.provider === "openai" ? "AI" : "parser";
-        toast.success(`Resume uploaded · ${provider} extracted ${data.parsed?.skills?.length ?? 0} skills`);
+        const skills = data.parsed?.skills?.length ?? 0;
+        const years = data.parsed?.yearsExperience;
+        toast.success(
+          `Resume uploaded · ${provider} extracted ${skills} skills${years ? ` · ${years}+ yrs` : ""}${
+            data.parsed?.currentTitle ? ` · ${data.parsed.currentTitle}` : ""
+          }`,
+        );
       },
     };
   }, [ready, refresh, run, session, state]);

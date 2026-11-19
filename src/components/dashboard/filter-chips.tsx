@@ -21,7 +21,7 @@ export function FilterChips({
             type="button"
             onClick={() => onChange(item.id)}
             className={cn(
-              "inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium transition duration-300",
+              "inline-flex h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm font-medium transition duration-300",
               active
                 ? "bg-black text-white shadow-[0_8px_18px_rgba(17,17,17,0.16)]"
                 : "bg-white text-muted-foreground shadow-soft hover:text-foreground",

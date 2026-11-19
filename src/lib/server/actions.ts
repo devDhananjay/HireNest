@@ -1,5 +1,11 @@
 import { profileCompleteness } from "@/lib/matching";
 import { requireSession } from "@/lib/server/auth";
+import {
+  enqueueApplicationFollowUps,
+  enqueueInterviewFollowUps,
+  enqueueStatusFollowUp,
+} from "@/lib/server/followups";
+import { qualifyLead } from "@/lib/server/lead-qualify";
 import { notifyUser, sendWhatsAppReminder } from "@/lib/server/notify";
 import { prisma } from "@/lib/server/prisma";
 import { slugify } from "@/lib/server/slug";
@@ -44,6 +50,14 @@ export async function runAction(action: string, payload: Record<string, unknown>
         },
       });
       await notifyUser(auth.session.id, "Application submitted", `You applied for ${job.title}.`);
+      const user = await prisma.user.findUnique({ where: { id: auth.session.id } });
+      await enqueueApplicationFollowUps({
+        applicationId: application.id,
+        candidateId: candidate.id,
+        jobTitle: job.title,
+        phone: candidate.phone,
+        email: user?.email,
+      });
       return Response.json({ ok: true, application });
     }
 
@@ -63,18 +77,39 @@ export async function runAction(action: string, payload: Record<string, unknown>
     }
 
     case "addLead": {
+      const data = {
+        companyName: String(payload.companyName ?? ""),
+        contactName: String(payload.contactName ?? ""),
+        email: String(payload.email ?? ""),
+        phone: String(payload.phone ?? ""),
+        hiringNeed: String(payload.hiringNeed ?? ""),
+        roles: String(payload.roles ?? ""),
+        location: String(payload.location ?? ""),
+      };
+      const qualify = await qualifyLead(data);
       const lead = await prisma.lead.create({
         data: {
-          companyName: String(payload.companyName ?? ""),
-          contactName: String(payload.contactName ?? ""),
-          email: String(payload.email ?? ""),
-          phone: String(payload.phone ?? ""),
-          hiringNeed: String(payload.hiringNeed ?? ""),
-          roles: String(payload.roles ?? ""),
-          location: String(payload.location ?? ""),
+          ...data,
+          source: String(payload.source ?? "web"),
+          qualifyScore: qualify.score,
+          qualifyLabel: qualify.label,
+          qualifyNotes: qualify.notes,
         },
       });
-      return Response.json({ ok: true, lead });
+      const recruiters = await prisma.user.findMany({
+        where: { role: { in: ["recruiter", "admin"] }, disabled: false },
+        select: { id: true },
+      });
+      if (recruiters.length) {
+        await prisma.notification.createMany({
+          data: recruiters.map((user) => ({
+            userId: user.id,
+            title: `${qualify.label} lead · ${data.companyName || "Hiring request"}`,
+            body: `${data.roles || "Roles TBD"} · score ${qualify.score}. ${qualify.notes}`,
+          })),
+        });
+      }
+      return Response.json({ ok: true, lead, qualify });
     }
 
     case "addInquiry": {
@@ -162,9 +197,17 @@ export async function runAction(action: string, payload: Record<string, unknown>
       const application = await prisma.application.update({
         where: { id },
         data: { status, timeline },
-        include: { candidate: true },
+        include: { candidate: { include: { user: true } }, job: true },
       });
       await notifyUser(application.candidate.userId, "Application update", `Status is now ${status}.`);
+      await enqueueStatusFollowUp({
+        applicationId: application.id,
+        candidateId: application.candidateId,
+        status,
+        jobTitle: application.job.title,
+        phone: application.candidate.phone,
+        email: application.candidate.user.email,
+      });
       return Response.json({ ok: true, application });
     }
 
@@ -215,9 +258,26 @@ export async function runAction(action: string, payload: Record<string, unknown>
         if (candidate.phone) {
           await sendWhatsAppReminder(
             candidate.phone.replace(/\s/g, ""),
-            `HIREORA reminder: ${input.mode} interview with ${input.interviewer} at ${input.scheduledAt}`,
+            `HIREORA: Your ${input.mode} interview for this role is scheduled with ${input.interviewer} at ${new Date(input.scheduledAt).toLocaleString("en-IN")}. Reply if you need to reschedule.`,
+            {
+              candidateId: candidate.id,
+              relatedType: "interview",
+              relatedId: interview.id,
+              template: process.env.WHATSAPP_INTERVIEW_TEMPLATE,
+            },
           );
         }
+        const job = await prisma.job.findUnique({ where: { id: input.jobId } });
+        await enqueueInterviewFollowUps({
+          interviewId: interview.id,
+          candidateId: candidate.id,
+          jobTitle: job?.title || "your role",
+          scheduledAt: new Date(input.scheduledAt),
+          mode: input.mode,
+          interviewer: input.interviewer,
+          phone: candidate.phone,
+          email: candidate.user.email,
+        });
       }
       return Response.json({ ok: true, interview });
     }
@@ -387,12 +447,16 @@ export async function runAction(action: string, payload: Record<string, unknown>
           id: "default",
           emailUpdates: Boolean(payload.emailUpdates ?? true),
           whatsappReminders: Boolean(payload.whatsappReminders ?? false),
+          autoFollowUps: Boolean(payload.autoFollowUps ?? true),
+          dailyDigest: Boolean(payload.dailyDigest ?? true),
         },
         update: {
           ...(payload.emailUpdates !== undefined ? { emailUpdates: Boolean(payload.emailUpdates) } : {}),
           ...(payload.whatsappReminders !== undefined
             ? { whatsappReminders: Boolean(payload.whatsappReminders) }
             : {}),
+          ...(payload.autoFollowUps !== undefined ? { autoFollowUps: Boolean(payload.autoFollowUps) } : {}),
+          ...(payload.dailyDigest !== undefined ? { dailyDigest: Boolean(payload.dailyDigest) } : {}),
         },
       });
       return Response.json({ ok: true, settings });

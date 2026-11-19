@@ -18,7 +18,10 @@ export default function CareerResourcesPage() {
     <div className="container-shell py-12">
       <p className="text-[12px] font-medium tracking-[0.16em] text-muted-foreground uppercase">Library</p>
       <h1 className="mt-2 font-heading text-4xl font-semibold sm:text-5xl">Career resources</h1>
-      <p className="mt-2 text-muted-foreground">Guides for Indian job seekers and hiring managers. Managed in the CMS.</p>
+      <p className="mt-2 max-w-2xl text-base leading-7 text-muted-foreground">
+        Practical guides for Indian job seekers and hiring managers — CTC negotiation, city hiring trends, fresher
+        programmes and more. Articles are published from the HIREORA CMS and updated as the market moves.
+      </p>
       <div className="mt-10 grid gap-5 md:grid-cols-2">
         {articles.map((article) => (
           <Link

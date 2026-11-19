@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { BRAND } from "@/lib/constants";
 import "./globals.css";
 
-const outfit = Outfit({
+/** BCG-adjacent body face (henderson-bcg-sans ≈ Helvetica Neue) */
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-outfit",
+  variable: "--font-inter",
 });
 
-const jakarta = Plus_Jakarta_Sans({
+/**
+ * BCG-adjacent headline face.
+ * BCG uses proprietary `henderson-bcg-serif` (Palatino / Garamond family, weight ~300).
+ * Cormorant Garamond is the closest public match.
+ */
+const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-jakarta",
+  variable: "--font-cormorant",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -25,7 +32,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${outfit.variable} ${jakarta.variable} h-full`}>
+    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${cormorant.variable} h-full`}>
       <body className="min-h-full bg-offwhite font-sans text-charcoal antialiased">
         <Providers>{children}</Providers>
       </body>

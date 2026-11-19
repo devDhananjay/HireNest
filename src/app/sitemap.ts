@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { BRAND } from "@/lib/constants";
+import { placementDossiers } from "@/lib/content/placement-dossiers";
 import { prisma } from "@/lib/server/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -12,11 +13,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/contact",
     "/for-employers",
     "/for-candidates",
+    "/talent-community",
     "/recruitment-services",
+    "/services/ai-hiring-os",
     "/services/permanent-staffing",
     "/services/bulk-hiring",
     "/services/executive-search",
     "/career-resources",
+    "/placement-dossiers",
+    "/trust",
+    "/engagement",
     "/privacy-policy",
     "/terms",
   ];
@@ -29,6 +35,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes.map((route) => ({ url: `${base}${route}`, lastModified: new Date() })),
+    ...placementDossiers.map((dossier) => ({
+      url: `${base}/placement-dossiers/${dossier.slug}`,
+      lastModified: new Date(),
+    })),
     ...companies.map((company) => ({ url: `${base}/companies/${company.slug}`, lastModified: new Date() })),
     ...articleRows.map((article) => ({
       url: `${base}/career-resources/${article.slug}`,

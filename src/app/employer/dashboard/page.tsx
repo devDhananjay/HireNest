@@ -58,7 +58,7 @@ export default function EmployerDashboard() {
     <div>
       <PageHeader
         title="Hiring desk"
-        description="Post roles, review applicants and request a recruiter when you need support."
+        description="Post roles, review applicants, schedule interviews and buy job packages when you need more hiring capacity."
         actions={
           <Link href="/employer/jobs/create" className={btnPrimary}>
             Post a job

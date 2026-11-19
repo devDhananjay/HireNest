@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, type ComponentProps, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { HeroMedia } from "@/components/marketing/hero-media";
+import { StickyBriefBar } from "@/components/marketing/sticky-action-bar";
 import {
   ArrowRight,
   BadgeCheck,
@@ -30,21 +32,22 @@ import {
   ShieldCheck,
   Sparkles,
   Target,
-  Trophy,
   Upload,
   User,
   UserCheck,
   UserPlus,
+  UserRound,
   Users,
 } from "lucide-react";
-import { CompanyMark } from "@/components/jobs/company-mark";
 import { JobCard } from "@/components/jobs/job-card";
+import { FeaturesStack } from "@/components/marketing/features-stack";
 import { Reveal } from "@/components/motion/reveal";
 import { JobSearchBar } from "@/components/search/job-search-bar";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { IconField } from "@/components/ui/icon-field";
 import { BRAND, CATEGORIES } from "@/lib/constants";
-import { stats, testimonials, articles } from "@/lib/demo/seed";
+import { placementDossiers } from "@/lib/content/placement-dossiers";
+import { testimonials, articles } from "@/lib/demo/seed";
 import { HOME_MEDIA } from "@/lib/home-media";
 import { useDemo } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -120,23 +123,20 @@ function SectionHeading({
   );
 }
 
-function IconField({
-  icon: Icon,
-  className,
-  ...props
-}: ComponentProps<"input"> & { icon: (props: { className?: string }) => ReactNode }) {
-  return (
-    <div className={cn("relative", className)}>
-      <Icon className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground/70" />
-      <Input className="pl-10" {...props} />
-    </div>
-  );
-}
-
 export function HomePage() {
   const router = useRouter();
-  const { jobs, companies, addLead } = useDemo();
+  const { jobs, addLead } = useDemo();
   const featured = jobs.filter((job) => job.featured && job.status === "active").slice(0, 3);
+  const activeMandates = jobs.filter((job) => job.status === "active");
+  const closingThisWeek = activeMandates.filter((job) => {
+    const deadline = new Date(job.deadline);
+    if (Number.isNaN(deadline.getTime())) return false;
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const end = new Date(start);
+    end.setDate(end.getDate() + 7);
+    return deadline >= start && deadline <= end;
+  });
   const [search, setSearch] = useState({ q: "", location: "", experience: "", type: "" });
   const [lead, setLead] = useState({
     companyName: "",
@@ -195,24 +195,17 @@ export function HomePage() {
   }
 
   return (
-    <div className="-mt-16 overflow-x-hidden sm:-mt-[4.35rem]">
+    <div className="-mt-16 overflow-x-clip sm:-mt-[4.35rem]">
       {/* Hero */}
       <section className="relative isolate min-h-[100svh] overflow-hidden bg-[#070709]">
-        <Image
-          src={HOME_MEDIA.hero}
-          alt="Premium consulting workspace"
-          fill
-          priority
-          sizes="100vw"
-          className="hero-media object-cover object-[60%_30%] sm:object-center"
-        />
+        <HeroMedia />
         <div className="hero-veil absolute inset-0" />
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/45 to-transparent" />
         <div className="container-shell relative flex min-h-[100svh] flex-col justify-end pb-28 pt-28 sm:pb-32 lg:pb-36">
           <p className="hero-rise font-heading text-[clamp(2.85rem,13.5vw,8rem)] leading-[0.86] font-semibold tracking-[-0.07em] text-white">
             {BRAND.name}
           </p>
-          <h1 className="hero-rise hero-rise-delay-1 mt-5 max-w-[18rem] font-heading text-[1.25rem] leading-[1.25] font-medium tracking-[-0.035em] text-white/92 sm:mt-6 sm:max-w-xl sm:text-[1.85rem] md:text-[2.15rem]">
+          <h1 className="hero-rise hero-rise-delay-1 mt-5 whitespace-nowrap font-heading text-[clamp(0.95rem,3.6vw,2.15rem)] leading-[1.2] font-medium tracking-[-0.035em] text-white/92 sm:mt-6">
             {BRAND.tagline}
           </h1>
           <p className="hero-rise hero-rise-delay-2 mt-4 max-w-md text-[14px] leading-6 text-white/58 sm:text-[15px] sm:leading-7">
@@ -273,13 +266,11 @@ export function HomePage() {
             </p>
             <div className="mt-8 grid grid-cols-2 gap-6 border-t border-white/10 pt-7">
               {[
-                { value: stats.candidatesPlaced, label: "Placements", suffix: "" },
-                { value: stats.successfulPlacements, label: "Success rate", suffix: "%" },
+                { value: "NDA", label: "First outreach" },
+                { value: "3", label: "Engagement models" },
               ].map((item) => (
                 <div key={item.label}>
-                  <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-                    <Counter value={item.value} suffix={item.suffix} />
-                  </p>
+                  <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">{item.value}</p>
                   <p className="mt-1 text-xs tracking-[0.16em] text-white/40 uppercase">{item.label}</p>
                 </div>
               ))}
@@ -292,17 +283,15 @@ export function HomePage() {
       <section className="container-shell pb-16 sm:pb-20">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
           {[
-            { label: "Live mandates", value: stats.jobsAvailable, icon: Briefcase },
-            { label: "Hiring organisations", value: stats.companiesHiring, icon: Building2 },
-            { label: "Professionals placed", value: stats.candidatesPlaced, icon: Users },
-            { label: "Offer acceptance", value: stats.successfulPlacements, suffix: "%", icon: Trophy },
+            { label: "Live mandates on the board", value: String(activeMandates.length), icon: Briefcase },
+            { label: "Placement dossiers", value: String(placementDossiers.length), icon: FileSearch },
+            { label: "Engagement models", value: "3", icon: Scale },
+            { label: "Confidential by default", value: "Yes", icon: Lock },
           ].map((item, index) => (
             <Reveal key={item.label} delay={index * 0.05}>
               <div className="rounded-[1.4rem] border border-black/[0.04] bg-white p-5 sm:rounded-[1.7rem] sm:p-6">
                 <item.icon className="size-4 text-muted-foreground" />
-                <p className="mt-5 font-heading text-3xl font-semibold tracking-tight sm:text-[2.5rem]">
-                  <Counter value={item.value} suffix={item.suffix} />
-                </p>
+                <p className="mt-5 font-heading text-3xl font-semibold tracking-tight sm:text-[2.5rem]">{item.value}</p>
                 <p className="mt-2 text-sm text-muted-foreground">{item.label}</p>
               </div>
             </Reveal>
@@ -427,22 +416,24 @@ export function HomePage() {
                   Two exact journeys.
                 </h2>
               </div>
-              <div className="inline-flex w-full rounded-full border border-white/12 bg-white/[0.04] p-1.5 sm:w-auto">
+              <div className="relative z-20 inline-flex w-full rounded-full border border-white/12 bg-white/[0.04] p-1.5 sm:w-auto">
                 {(
                   [
-                    { id: "candidate" as const, label: "Candidates" },
-                    { id: "employer" as const, label: "Employers" },
+                    { id: "candidate" as const, label: "Candidates", icon: UserRound },
+                    { id: "employer" as const, label: "Employers", icon: Briefcase },
                   ] as const
                 ).map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
                     onClick={() => setJourney(tab.id)}
+                    aria-pressed={journey === tab.id}
                     className={cn(
-                      "h-11 flex-1 rounded-full px-6 text-sm font-medium transition sm:flex-none",
-                      journey === tab.id ? "bg-white text-black" : "text-white/55 hover:text-white",
+                      "inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-sm font-medium transition sm:flex-none sm:px-6",
+                      journey === tab.id ? "bg-white text-black shadow-soft" : "text-white/55 hover:bg-white/8 hover:text-white",
                     )}
                   >
+                    <tab.icon className="size-4" />
                     {tab.label}
                   </button>
                 ))}
@@ -506,6 +497,44 @@ export function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      <FeaturesStack />
+
+      {/* AI Hiring OS */}
+      <section className="container-shell pb-16 sm:pb-24">
+        <Link
+          href="/services/ai-hiring-os"
+          className="group relative isolate grid min-h-[380px] overflow-hidden rounded-[1.7rem] bg-black text-white sm:min-h-[420px] sm:rounded-[2.2rem] lg:grid-cols-[1.15fr_0.85fr]"
+        >
+          <div className="relative z-10 flex flex-col justify-end p-7 sm:p-10 lg:p-12">
+            <p className="inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.16em] text-white/50 uppercase">
+              <Sparkles className="size-3.5" />
+              Featured product
+            </p>
+            <h2 className="mt-4 font-heading text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl">
+              AI Hiring OS
+            </h2>
+            <p className="mt-2 text-sm text-white/50 sm:text-base">Recruitment Automation Platform</p>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/65 sm:text-base">
+              Resume upload → AI profile · JD matching · Voice screening · WhatsApp follow-ups · Live client & recruiter
+              dashboards. Built for recruitment agencies, HR teams and placement consultancies.
+            </p>
+            <p className="mt-7 inline-flex items-center text-sm font-medium">
+              Explore the platform <ArrowRight className="ml-1 size-4 transition group-hover:translate-x-0.5" />
+            </p>
+          </div>
+          <div className="relative min-h-[200px] lg:min-h-full">
+            <Image
+              src={HOME_MEDIA.services.aiHiringOs}
+              alt="AI Hiring OS workspace"
+              fill
+              sizes="(max-width: 1024px) 100vw, 40vw"
+              className="object-cover opacity-80 transition duration-700 group-hover:scale-[1.03]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent lg:bg-gradient-to-l lg:from-transparent lg:via-black/30 lg:to-black" />
+          </div>
+        </Link>
       </section>
 
       {/* Services image cards */}
@@ -722,17 +751,29 @@ export function HomePage() {
               className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            <div className="absolute right-5 bottom-5 left-5 rounded-2xl bg-white/95 p-4 backdrop-blur sm:right-8 sm:bottom-8 sm:left-8 sm:p-5">
+            <Link
+              href="/jobs"
+              className="absolute right-5 bottom-5 left-5 rounded-2xl bg-white/95 p-4 backdrop-blur transition hover:bg-white sm:right-8 sm:bottom-8 sm:left-8 sm:p-5"
+            >
               <div className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-black text-white">
+                <span className="relative flex size-10 items-center justify-center rounded-full bg-black text-white">
                   <Search className="size-4" />
+                  <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  </span>
                 </span>
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-medium">Live search pulse</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">12 retained mandates · 4 closing this week</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {activeMandates.length} active mandates
+                    {closingThisWeek.length > 0
+                      ? ` · ${closingThisWeek.length} closing this week`
+                      : " · open roles updating live"}
+                  </p>
                 </div>
+                <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -743,7 +784,7 @@ export function HomePage() {
           <SectionHeading
             light
             title="Voices from the network"
-            subtitle="Demo stories from candidates and hiring leaders."
+            subtitle="Anonymised notes from candidates and hiring leaders — names withheld by default."
           />
           <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {testimonials.map((item, index) => (
@@ -754,10 +795,10 @@ export function HomePage() {
                 <div className="relative h-48 sm:h-56">
                   <Image
                     src={HOME_MEDIA.portraits[index] ?? HOME_MEDIA.portraits[0]}
-                    alt={item.name}
+                    alt=""
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover"
+                    className="object-cover opacity-90"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0e] via-transparent to-transparent" />
                 </div>
@@ -945,91 +986,88 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* Trusted by — bottom */}
+      {/* Proof — anonymised dossiers, not a logo wall */}
       <section className="pb-16 sm:pb-24">
         <div className="container-shell">
           <div className="overflow-hidden rounded-[1.7rem] bg-[#0c0c0e] text-white sm:rounded-[2.25rem]">
             <div className="border-b border-white/8 px-6 pt-9 pb-8 sm:px-10 sm:pt-12 sm:pb-10 lg:px-12">
               <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <Eyebrow light>Trusted by</Eyebrow>
+                  <Eyebrow light>Proof</Eyebrow>
                   <h2 className="mt-4 font-heading text-[clamp(2rem,5.5vw,3.6rem)] leading-[1.05] font-semibold tracking-tight">
-                    Organisations that trust HIREORA with their hardest hires.
+                    Hardest hires — without a logo wall.
                   </h2>
                   <p className="mt-4 max-w-lg text-sm leading-7 text-white/50 sm:text-[15px]">
-                    From product-led startups to national enterprises — confidential mandates across technology, finance, healthcare and operations.
+                    Technology, finance, healthcare and operations, including confidential mandates. Proof lives in
+                    anonymised dossiers: mandate → shortlist → close.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-6 sm:gap-8 lg:text-right">
                   <div>
                     <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-                      <Counter value={stats.companiesHiring} />
+                      {placementDossiers.length}
                     </p>
-                    <p className="mt-1 text-[11px] tracking-[0.16em] text-white/35 uppercase">Hiring partners</p>
+                    <p className="mt-1 text-[11px] tracking-[0.16em] text-white/35 uppercase">Published dossiers</p>
                   </div>
                   <div>
                     <p className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-                      <Counter value={stats.successfulPlacements} suffix="%" />
+                      <Counter value={11} suffix="d" />
                     </p>
-                    <p className="mt-1 text-[11px] tracking-[0.16em] text-white/35 uppercase">Offer acceptance</p>
+                    <p className="mt-1 text-[11px] tracking-[0.16em] text-white/35 uppercase">Median shortlist</p>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-px bg-white/8 sm:grid-cols-2 lg:grid-cols-4">
-              {companies.slice(0, 8).map((company) => (
+              {placementDossiers.map((dossier) => (
                 <Link
-                  key={company.id}
-                  href={`/companies`}
+                  key={dossier.slug}
+                  href={`/placement-dossiers/${dossier.slug}`}
                   className="group flex min-h-[148px] flex-col justify-between bg-[#0c0c0e] p-5 transition hover:bg-white/[0.04] sm:min-h-[168px] sm:p-6"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <CompanyMark
-                      name={company.name}
-                      color={company.logoColor}
-                      size="md"
-                      className="ring-0 ring-offset-0"
-                    />
-                    {company.verified ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] tracking-[0.14em] text-white/35 uppercase">
-                        <BadgeCheck className="size-3.5" /> Verified
-                      </span>
-                    ) : null}
+                    <span className="text-[10px] tracking-[0.14em] text-white/35 uppercase">{dossier.mandateType}</span>
+                    <span className="text-[10px] tracking-[0.14em] text-white/35 uppercase">
+                      {dossier.daysToShortlist}d shortlist
+                    </span>
                   </div>
                   <div>
                     <p className="font-heading text-base font-semibold tracking-tight transition group-hover:text-white sm:text-lg">
-                      {company.name}
+                      {dossier.title}
                     </p>
                     <p className="mt-1 text-xs text-white/40 sm:text-sm">
-                      {company.industry} · {company.location}
+                      {dossier.industry} · {dossier.location}
                     </p>
                   </div>
                 </Link>
               ))}
             </div>
 
-            <div className="overflow-hidden border-t border-white/8 py-5">
-              <div className="trust-marquee gap-10 px-6 sm:gap-14 sm:px-10">
-                {[...companies, ...companies].map((company, index) => (
-                  <span
-                    key={`${company.id}-${index}`}
-                    className="inline-flex shrink-0 items-center gap-3 text-sm whitespace-nowrap text-white/35"
-                  >
-                    <span
-                      className="size-1.5 rounded-full"
-                      style={{ background: company.logoColor }}
-                    />
-                    {company.name}
-                    <span className="text-white/15">/</span>
-                    {company.employees} team
-                  </span>
-                ))}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/8 px-6 py-6 sm:px-10">
+              <p className="max-w-xl text-sm leading-6 text-white/50">
+                Client names stay private by default. Read process, shortlist speed and outcomes instead.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/trust"
+                  className="inline-flex h-11 items-center rounded-full border border-white/20 px-5 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Trust & confidentiality
+                </Link>
+                <Link
+                  href="/placement-dossiers"
+                  className="inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-medium text-black transition hover:bg-white/90"
+                >
+                  All dossiers
+                </Link>
               </div>
             </div>
           </div>
         </div>
       </section>
+
+      <StickyBriefBar title="Ready to brief a hire — or explore open roles?" primaryHref="/contact" primaryLabel="Brief us" secondaryHref="/jobs" secondaryLabel="Roles" />
     </div>
   );
 }

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { LockKeyhole, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { IconField } from "@/components/ui/icon-field";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, ROLE_HOME } from "@/lib/constants";
 import { useDemo } from "@/lib/store";
 import type { SessionUser } from "@/lib/types";
@@ -60,14 +61,23 @@ function LoginForm() {
         Role-based access backed by PostgreSQL. Seeded password is {DEMO_PASSWORD}.
       </p>
       <form className="mt-8 space-y-3" onSubmit={onSubmit}>
-        <Input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
-        <Input
+        <IconField
+          icon={Mail}
+          required
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          inputClassName="h-12"
+        />
+        <IconField
+          icon={LockKeyhole}
           required
           type="password"
           placeholder={`Password (${DEMO_PASSWORD})`}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="h-12"
+          inputClassName="h-12"
         />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button type="submit" className="h-12 w-full rounded-full" disabled={loading}>
@@ -78,6 +88,7 @@ function LoginForm() {
         {DEMO_ACCOUNTS.map((account) => (
           <Button
             key={account.email}
+            type="button"
             variant="outline"
             className="h-12 justify-between rounded-full px-4"
             disabled={loading}

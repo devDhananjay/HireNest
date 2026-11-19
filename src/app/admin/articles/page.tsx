@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { BookOpen } from "lucide-react";
+import { AlignLeft, BookOpen, Clock3, FolderOpen, Heading, TextQuote } from "lucide-react";
 import { IconOrb } from "@/components/brand/icon-orb";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { IconField, IconTextarea } from "@/components/ui/icon-field";
 import type { Article } from "@/lib/types";
 
 export default function AdminArticlesPage() {
@@ -63,19 +62,23 @@ export default function AdminArticlesPage() {
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Articles CMS" description="Publish career library content to PostgreSQL." />
+      <PageHeader
+        title="Articles CMS"
+        description="Write and publish career library articles. Published posts appear on the public career resources pages immediately."
+      />
       <form onSubmit={createArticle} className="space-y-4 rounded-[1.85rem] bg-white p-7 shadow-soft">
         <div className="flex items-center gap-3">
           <IconOrb icon={BookOpen} />
           <p className="text-sm text-muted-foreground">New article</p>
         </div>
-        <Input required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
-        <Input required placeholder="Excerpt" value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
+        <IconField icon={Heading} required placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+        <IconField icon={TextQuote} required placeholder="Excerpt" value={form.excerpt} onChange={(e) => setForm({ ...form, excerpt: e.target.value })} />
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
-          <Input placeholder="Read time" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} />
+          <IconField icon={FolderOpen} placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+          <IconField icon={Clock3} placeholder="Read time" value={form.readTime} onChange={(e) => setForm({ ...form, readTime: e.target.value })} />
         </div>
-        <Textarea
+        <IconTextarea
+          icon={AlignLeft}
           required
           placeholder="Body paragraphs separated by a blank line"
           value={form.body}

@@ -1,64 +1,16 @@
 import { prisma } from "@/lib/server/prisma";
+import { sendResendEmail } from "@/lib/server/notify-email";
+import { sendWhatsAppMessage } from "@/lib/server/whatsapp";
 
 async function settings() {
   return (
     (await prisma.platformSettings.findUnique({ where: { id: "default" } })) ?? {
       emailUpdates: true,
       whatsappReminders: false,
+      autoFollowUps: true,
+      dailyDigest: true,
     }
   );
-}
-
-async function sendResendEmail(to: string, subject: string, text: string) {
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM || "HIREORA <noreply@hireora.in>";
-  if (!key) {
-    console.info("[hireora:email:dev]", { to, subject, text });
-    return { ok: true, provider: "console" as const };
-  }
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ from, to: [to], subject, text }),
-  });
-  if (!res.ok) {
-    const body = await res.text();
-    console.error("[hireora:email:error]", body);
-    return { ok: false, provider: "resend" as const };
-  }
-  return { ok: true, provider: "resend" as const };
-}
-
-async function sendTwilioWhatsApp(to: string, body: string) {
-  const sid = process.env.TWILIO_ACCOUNT_SID;
-  const token = process.env.TWILIO_AUTH_TOKEN;
-  const from = process.env.TWILIO_WHATSAPP_FROM;
-  if (!sid || !token || !from) {
-    console.info("[hireora:whatsapp:dev]", { to, body });
-    return { ok: true, provider: "console" as const };
-  }
-  const endpoint = `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`;
-  const params = new URLSearchParams({
-    From: from,
-    To: to.startsWith("whatsapp:") ? to : `whatsapp:${to}`,
-    Body: body,
-  });
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: params,
-  });
-  if (!res.ok) {
-    console.error("[hireora:whatsapp:error]", await res.text());
-    return { ok: false, provider: "twilio" as const };
-  }
-  return { ok: true, provider: "twilio" as const };
 }
 
 export async function notifyUser(userId: string, title: string, body: string) {
@@ -89,10 +41,17 @@ export async function sendPasswordResetEmail(email: string, code: string) {
   );
 }
 
-export async function sendWhatsAppReminder(to: string, body: string) {
-  const flags = await settings();
-  if (!flags.whatsappReminders) {
-    return { ok: false, skipped: true as const };
-  }
-  return sendTwilioWhatsApp(to, body);
+export async function sendWhatsAppReminder(
+  to: string,
+  body: string,
+  meta?: { candidateId?: string; relatedType?: string; relatedId?: string; template?: string },
+) {
+  return sendWhatsAppMessage({
+    toPhone: to,
+    body,
+    template: meta?.template || process.env.WHATSAPP_DEFAULT_TEMPLATE || undefined,
+    candidateId: meta?.candidateId,
+    relatedType: meta?.relatedType,
+    relatedId: meta?.relatedId,
+  });
 }

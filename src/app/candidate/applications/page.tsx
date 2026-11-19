@@ -64,52 +64,84 @@ export default function CandidateApplicationsPage() {
             return (
               <article
                 key={app.id}
-                className={cn("rounded-[1.85rem] p-6 shadow-soft sm:p-7", featured ? "bg-black text-white shadow-lift" : "bg-white")}
+                className={cn(
+                  "group relative rounded-[1.85rem] p-6 shadow-soft sm:p-7",
+                  featured ? "bg-black text-white shadow-lift" : "bg-white",
+                )}
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex items-start gap-4">
-                    <CompanyMark
-                      name={company?.name ?? "Co"}
-                      color={featured ? "#ffffff" : company?.logoColor ?? "#111111"}
-                      className={featured ? "ring-white/10" : "ring-[#f3f4f8]"}
-                    />
-                    <div>
-                      <p className={cn("text-sm font-medium", featured ? "text-white" : "text-foreground")}>{company?.name}</p>
-                      <h2 className="font-heading text-xl font-semibold tracking-tight sm:text-[1.45rem]">{job?.title}</h2>
-                      <p className={cn("mt-1 text-sm", featured ? "text-white/55" : "text-muted-foreground")}>
-                        {job?.location} · {job ? salaryRange(job.salaryMin, job.salaryMax) : ""} · Applied {applied.full}
-                      </p>
+                {job ? (
+                  <Link
+                    href={`/jobs/${job.slug}`}
+                    className="absolute inset-0 z-0 rounded-[inherit]"
+                    aria-label={`View ${job.title}`}
+                  />
+                ) : null}
+                <div className="relative z-10 pointer-events-none">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <CompanyMark
+                        name={company?.name ?? "Co"}
+                        color={featured ? "#ffffff" : company?.logoColor ?? "#111111"}
+                        className={featured ? "ring-white/10" : "ring-[#f3f4f8]"}
+                      />
+                      <div>
+                        <p className={cn("text-sm font-medium", featured ? "text-white" : "text-foreground")}>{company?.name}</p>
+                        <h2 className="font-heading text-xl font-semibold tracking-tight sm:text-[1.45rem]">{job?.title}</h2>
+                        <p className={cn("mt-1 text-sm", featured ? "text-white/55" : "text-muted-foreground")}>
+                          {job?.location} · {job ? salaryRange(job.salaryMin, job.salaryMax) : ""} · Applied {applied.full}
+                        </p>
+                      </div>
                     </div>
+                    <span
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-medium",
+                        featured
+                          ? "bg-white/12 text-white"
+                          : app.status === "Rejected"
+                            ? "bg-destructive/10 text-destructive"
+                            : "bg-[#f4f5f8] text-foreground",
+                      )}
+                    >
+                      {app.status}
+                    </span>
                   </div>
-                  <span
+                  <div className="mt-6">
+                    <StageTrack current={app.status as ApplicationStatus} tone={featured ? "dark" : "light"} />
+                  </div>
+                  <ol className={cn("mt-6 space-y-3 border-l pl-5", featured ? "border-white/12" : "border-[#eef0f5]")}>
+                    {app.timeline.slice(-3).map((event, index) => (
+                      <li key={index} className="text-sm">
+                        <p className="font-medium">{event.status}</p>
+                        <p className={cn("text-xs", featured ? "text-white/45" : "text-muted-foreground")}>
+                          {calendarParts(event.at).full} · {event.note}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+                <div className="relative z-20 mt-6 flex flex-wrap gap-2">
+                  {job ? (
+                    <span
+                      className={cn(
+                        featured
+                          ? "inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-medium text-black"
+                          : btnPrimary,
+                      )}
+                    >
+                      View role
+                    </span>
+                  ) : null}
+                  <a
+                    href={wa}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
                     className={cn(
-                      "rounded-full px-3 py-1 text-xs font-medium",
-                      featured ? "bg-white/12 text-white" : app.status === "Rejected" ? "bg-destructive/10 text-destructive" : "bg-[#f4f5f8] text-foreground",
+                      btnOutline,
+                      "pointer-events-auto",
+                      featured && "border-0 bg-white/10 text-white shadow-none hover:bg-white/15",
                     )}
                   >
-                    {app.status}
-                  </span>
-                </div>
-                <div className="mt-6">
-                  <StageTrack current={app.status as ApplicationStatus} tone={featured ? "dark" : "light"} />
-                </div>
-                <ol className={cn("mt-6 space-y-3 border-l pl-5", featured ? "border-white/12" : "border-[#eef0f5]")}>
-                  {app.timeline.slice(-3).map((event, index) => (
-                    <li key={index} className="text-sm">
-                      <p className="font-medium">{event.status}</p>
-                      <p className={cn("text-xs", featured ? "text-white/45" : "text-muted-foreground")}>
-                        {calendarParts(event.at).full} · {event.note}
-                      </p>
-                    </li>
-                  ))}
-                </ol>
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {job ? (
-                    <Link href={`/jobs/${job.slug}`} className={cn(featured ? "inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-medium text-black" : btnPrimary)}>
-                      View role
-                    </Link>
-                  ) : null}
-                  <a href={wa} target="_blank" rel="noreferrer" className={cn(btnOutline, featured && "border-0 bg-white/10 text-white shadow-none hover:bg-white/15")}>
                     Message recruiter
                   </a>
                 </div>

@@ -11,7 +11,10 @@ export default function RecruiterDashboard() {
   const { candidates, pipeline, jobs, leads } = useDemo();
   return (
     <div>
-      <PageHeader title="Recruiter workspace" description="CRM, pipeline and client mandates in one place." />
+      <PageHeader
+        title="Recruiter workspace"
+        description="Track clients, pipeline stages and interview rounds for every mandate you own — with notes and duplicate flags in one CRM."
+      />
       <div className="grid gap-6 md:grid-cols-4">
         <StatCard label="Candidates" value={candidates.length} icon={Users} />
         <StatCard label="Pipeline" value={pipeline.length} icon={KanbanSquare} tone="royal" />

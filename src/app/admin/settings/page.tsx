@@ -12,11 +12,15 @@ import { testimonials } from "@/lib/demo/seed";
 type SettingsState = {
   emailUpdates: boolean;
   whatsappReminders: boolean;
+  autoFollowUps: boolean;
+  dailyDigest: boolean;
 };
 
 const defaults: SettingsState = {
   emailUpdates: true,
   whatsappReminders: false,
+  autoFollowUps: true,
+  dailyDigest: true,
 };
 
 export default function AdminSettingsPage() {
@@ -30,6 +34,8 @@ export default function AdminSettingsPage() {
         setSettings({
           emailUpdates: Boolean(data.settings?.emailUpdates ?? true),
           whatsappReminders: Boolean(data.settings?.whatsappReminders ?? false),
+          autoFollowUps: Boolean(data.settings?.autoFollowUps ?? true),
+          dailyDigest: Boolean(data.settings?.dailyDigest ?? true),
         });
       })
       .finally(() => setLoading(false));
@@ -75,8 +81,27 @@ export default function AdminSettingsPage() {
               onCheckedChange={(whatsappReminders) => void update({ whatsappReminders })}
             />
           </label>
+          <label className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f8fb] px-4 py-3">
+            Auto follow-up sequences
+            <Switch
+              checked={settings.autoFollowUps}
+              disabled={loading}
+              onCheckedChange={(autoFollowUps) => void update({ autoFollowUps })}
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f8fb] px-4 py-3">
+            Daily hiring digest
+            <Switch
+              checked={settings.dailyDigest}
+              disabled={loading}
+              onCheckedChange={(dailyDigest) => void update({ dailyDigest })}
+            />
+          </label>
           <p className="text-xs text-muted-foreground">
-            Flags are stored in PostgreSQL. Email uses Resend when configured; WhatsApp uses Twilio. Otherwise events log to the server console.
+            Email uses Resend when configured; WhatsApp uses Meta Cloud API (or Twilio). Cron:{" "}
+            <code className="rounded bg-[#eef0f4] px-1">POST /api/cron/followups</code> and{" "}
+            <code className="rounded bg-[#eef0f4] px-1">POST /api/cron/daily-digest</code> with{" "}
+            <code className="rounded bg-[#eef0f4] px-1">Authorization: Bearer CRON_SECRET</code>.
           </p>
         </div>
       </section>

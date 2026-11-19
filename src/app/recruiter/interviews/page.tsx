@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Calendar, Video } from "lucide-react";
 import { DateBlock } from "@/components/dashboard/date-block";
 import { EmptyState } from "@/components/dashboard/empty-state";
@@ -54,7 +55,26 @@ export default function RecruiterInterviewsPage() {
           })}
         </div>
       ) : (
-        <EmptyState title="No interviews scheduled" description="When you book a round, it will land here." />
+        <EmptyState
+          title="No interviews scheduled"
+          description="Book a round from the pipeline, or offer a self-serve slot from an application."
+          action={
+            <>
+              <Link
+                href="/recruiter/pipeline"
+                className="inline-flex h-10 items-center rounded-full bg-black px-4 text-sm font-medium text-white"
+              >
+                Open pipeline
+              </Link>
+              <Link
+                href="/recruiter/candidates"
+                className="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-medium"
+              >
+                Review candidates
+              </Link>
+            </>
+          }
+        />
       )}
     </div>
   );

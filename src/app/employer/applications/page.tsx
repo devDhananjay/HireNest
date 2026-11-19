@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { toast } from "sonner";
 import { Calendar, CheckCircle2, ClipboardList, Users } from "lucide-react";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FilterChips } from "@/components/dashboard/filter-chips";
@@ -21,6 +23,33 @@ export default function EmployerApplicationsPage() {
   const mine = applications.filter((app) => jobs.find((job) => job.id === app.jobId)?.companyId === companyId);
   const [when, setWhen] = useState("2026-11-12T11:00");
   const [filter, setFilter] = useState("all");
+  const [offeringId, setOfferingId] = useState<string | null>(null);
+
+  async function offerSlot(app: { id: string; jobId: string; candidateId: string }) {
+    setOfferingId(app.id);
+    try {
+      const res = await fetch("/api/interview-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: app.jobId,
+          applicationId: app.id,
+          candidateId: app.candidateId,
+          startsAt: new Date(when).toISOString(),
+          mode: "Video",
+          location: "Google Meet",
+          interviewer: session?.name ?? "Hiring manager",
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not offer slot");
+      toast.success("Interview slot offered — candidate can self-book from Interviews.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Offer failed");
+    } finally {
+      setOfferingId(null);
+    }
+  }
 
   const counts = useMemo(
     () => ({
@@ -95,7 +124,7 @@ export default function EmployerApplicationsPage() {
                       applicationId: app.id,
                       jobId: app.jobId,
                       candidateId: app.candidateId,
-                      companyId: companyId,
+                      companyId: companyId!,
                       scheduledAt: new Date(when).toISOString(),
                       mode: "Video",
                       location: "Google Meet",
@@ -104,6 +133,15 @@ export default function EmployerApplicationsPage() {
                   }
                 >
                   Schedule interview
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 rounded-full"
+                  disabled={offeringId === app.id}
+                  onClick={() => void offerSlot(app)}
+                >
+                  {offeringId === app.id ? "Offering…" : "Offer self-book slot"}
                 </Button>
                 {candidate?.resumeUrl ? (
                   <a
@@ -125,7 +163,20 @@ export default function EmployerApplicationsPage() {
       </div>
       ) : (
         <div className="mt-7">
-          <EmptyState title="No applications in this view" description="New applicants will land here as soon as they apply." />
+          <EmptyState
+            title="No applications in this view"
+            description="Post an active role or brief a consultant — applicants and shortlists will land here."
+            action={
+              <>
+                <Link href="/employer/jobs/create" className="inline-flex h-10 items-center rounded-full bg-black px-4 text-sm font-medium text-white">
+                  Post a job
+                </Link>
+                <Link href="/contact" className="inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-medium">
+                  Brief a recruiter
+                </Link>
+              </>
+            }
+          />
         </div>
       )}
     </div>
