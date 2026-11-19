@@ -64,6 +64,7 @@ const nav: Record<UserRole, { href: string; label: string; icon: typeof LayoutDa
     { href: "/admin/applications", label: "Applications", icon: ClipboardList },
     { href: "/admin/companies", label: "Companies", icon: Building2 },
     { href: "/admin/recruiters", label: "Recruiters", icon: UserRound },
+    { href: "/admin/articles", label: "Articles", icon: FileText },
     { href: "/admin/reports", label: "Reports", icon: BarChart3 },
     { href: "/admin/settings", label: "Settings", icon: Settings },
   ],
@@ -116,7 +117,7 @@ export function DashboardShell({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { session, ready, notifications, jobs, companies, candidates, markNotificationRead, markAllNotificationsRead, setSession } = useDemo();
+  const { session, ready, notifications, jobs, companies, candidates, leads, inquiries, markNotificationRead, markAllNotificationsRead, setSession } = useDemo();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [bellOpen, setBellOpen] = useState(false);
@@ -124,6 +125,27 @@ export function DashboardShell({
 
   const mine = notifications.filter((item) => item.userId === session?.id);
   const unread = mine.filter((item) => !item.read).length;
+  const inbox = useMemo(() => {
+    if (role === "admin") {
+      return inquiries.slice(0, 8).map((item) => ({
+        id: item.id,
+        title: item.topic || "Contact inquiry",
+        body: `${item.name}: ${item.message}`,
+      }));
+    }
+    if (role === "recruiter" || role === "employer") {
+      return leads.slice(0, 8).map((item) => ({
+        id: item.id,
+        title: `${item.companyName} · ${item.status}`,
+        body: item.hiringNeed,
+      }));
+    }
+    return mine.slice(0, 8).map((item) => ({
+      id: item.id,
+      title: item.title,
+      body: item.body,
+    }));
+  }, [inquiries, leads, mine, role]);
   const pills = nav[role];
   const mobileTabs = pills.slice(0, 4);
 
@@ -158,6 +180,7 @@ export function DashboardShell({
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setSession(null);
+    router.push("/login");
     router.push("/");
     router.refresh();
   }
@@ -242,28 +265,20 @@ export function DashboardShell({
             {mailOpen ? (
               <div className="absolute right-0 z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] rounded-[1.5rem] bg-white p-3 shadow-lift">
                 <div className="flex items-center justify-between px-2">
-                  <p className="text-sm font-medium">Messages</p>
-                  {unread ? (
-                    <button type="button" className="text-xs text-muted-foreground hover:text-foreground" onClick={markAllNotificationsRead}>
-                      Mark all read
-                    </button>
-                  ) : null}
+                  <p className="text-sm font-medium">
+                    {role === "admin" ? "Inquiries" : role === "candidate" ? "Updates" : "Hiring requests"}
+                  </p>
                 </div>
                 <div className="mt-2 max-h-80 space-y-2 overflow-auto">
-                  {mine.length ? (
-                    mine.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => markNotificationRead(item.id)}
-                        className="w-full rounded-xl bg-muted/60 p-3 text-left"
-                      >
+                  {inbox.length ? (
+                    inbox.map((item) => (
+                      <div key={item.id} className="w-full rounded-xl bg-muted/60 p-3 text-left">
                         <p className="text-sm font-medium">{item.title}</p>
                         <p className="text-xs text-muted-foreground">{item.body}</p>
-                      </button>
+                      </div>
                     ))
                   ) : (
-                    <p className="p-3 text-sm text-muted-foreground">No messages in this demo inbox yet.</p>
+                    <p className="p-3 text-sm text-muted-foreground">Inbox is empty in this demo.</p>
                   )}
                 </div>
               </div>

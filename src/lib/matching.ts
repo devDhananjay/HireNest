@@ -4,7 +4,27 @@ export type MatchFactor = {
   label: string;
   score: number;
   detail: string;
+  weight: number;
 };
+
+function clamp(n: number, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function yearsFromExperience(candidate: Candidate) {
+  if (!candidate.experience?.length) return 0;
+  let years = 0;
+  for (const row of candidate.experience) {
+    const start = Number.parseInt(row.start, 10);
+    const end = /present/i.test(row.end) ? new Date().getFullYear() : Number.parseInt(row.end, 10);
+    if (Number.isFinite(start) && Number.isFinite(end) && end >= start) {
+      years += end - start;
+    } else {
+      years += 2;
+    }
+  }
+  return Math.max(years, candidate.experience.length * 1.5);
+}
 
 export function matchCandidateToJob(candidate: Candidate, job: Job) {
   const skillHits = job.skills.filter((skill) =>
@@ -20,62 +40,98 @@ export function matchCandidateToJob(candidate: Candidate, job: Job) {
       ? 100
       : 35;
 
-  const expYears = candidate.experience.length * 2.5;
+  const expYears = yearsFromExperience(candidate);
   const expScore =
     expYears >= job.experienceMin && expYears <= job.experienceMax + 2
-      ? 90
+      ? 92
       : expYears >= job.experienceMin - 1
-        ? 70
-        : 40;
+        ? 72
+        : 42;
 
   const salaryScore =
     candidate.expectedSalary >= job.salaryMin * 0.8 &&
     candidate.expectedSalary <= job.salaryMax * 1.15
-      ? 85
-      : 50;
+      ? 88
+      : 52;
 
+  const weights = { skills: 0.38, location: 0.22, experience: 0.2, salary: 0.12, profile: 0.08 };
   const score = Math.round(
-    skillScore * 0.4 + locationScore * 0.25 + expScore * 0.2 + salaryScore * 0.15,
+    clamp(
+      skillScore * weights.skills +
+        locationScore * weights.location +
+        expScore * weights.experience +
+        salaryScore * weights.salary +
+        candidate.completeness * weights.profile,
+    ),
   );
+
+  // Calibrated "fit probability" for UI — not a guarantee of hire.
+  const hireProbability = Math.round(
+    clamp(12 + score * 0.78 + (skillHits.length >= 2 ? 6 : 0) - (candidate.completeness < 50 ? 8 : 0)),
+  );
+  const confidence =
+    candidate.completeness >= 80 && skillHits.length >= 2
+      ? "high"
+      : candidate.completeness >= 55
+        ? "medium"
+        : "low";
 
   const factors: MatchFactor[] = [
     {
       label: "Skills",
       score: skillScore,
-      detail: skillHits.length
-        ? `Matched ${skillHits.join(", ")}`
-        : "Limited skill overlap",
+      weight: weights.skills,
+      detail: skillHits.length ? `Matched ${skillHits.join(", ")}` : "Limited skill overlap",
     },
     {
       label: "Location",
       score: locationScore,
-      detail: `${candidate.location} vs ${job.location} (${job.workMode})`,
+      weight: weights.location,
+      detail: `${candidate.location || "Unknown"} vs ${job.location} (${job.workMode})`,
     },
     {
       label: "Experience",
       score: expScore,
-      detail: `Role asks ${job.experienceMin}–${job.experienceMax} years`,
+      weight: weights.experience,
+      detail: `~${expYears.toFixed(1)} yrs vs role ${job.experienceMin}–${job.experienceMax}`,
     },
     {
       label: "Salary band",
       score: salaryScore,
+      weight: weights.salary,
       detail: "Compared expected CTC to posted range",
+    },
+    {
+      label: "Profile depth",
+      score: candidate.completeness,
+      weight: weights.profile,
+      detail: `Completeness ${candidate.completeness}%`,
     },
   ];
 
-  return { score, factors };
+  return {
+    score,
+    hireProbability,
+    confidence,
+    factors,
+    disclaimer:
+      "Fit score and hire probability are model estimates from profile overlap. They are decision-support signals, not hiring outcomes.",
+  };
 }
 
 export function resumeScore(candidate: Candidate, job?: Job) {
   const completeness = candidate.completeness;
-  const match = job ? matchCandidateToJob(candidate, job).score : 70;
-  const score = Math.round(completeness * 0.55 + match * 0.45);
+  const match = job ? matchCandidateToJob(candidate, job) : null;
+  const score = Math.round(completeness * 0.55 + (match?.score ?? 70) * 0.45);
   return {
     score,
     completeness,
-    relevance: job ? match : null,
+    relevance: match?.score ?? null,
+    hireProbability: match?.hireProbability ?? null,
+    confidence: match?.confidence ?? (completeness >= 70 ? "medium" : "low"),
     disclaimer:
-      "This is a completeness and relevance score for guidance only. It is not a hiring probability.",
+      match?.disclaimer ??
+      "This is a completeness and relevance score for guidance only. It is not a guaranteed hiring probability.",
   };
 }
 

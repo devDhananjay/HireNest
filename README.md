@@ -1,16 +1,28 @@
 # HIREORA
 
-Premium recruitment and placement platform scaffold for the Indian market.
+Premium recruitment and placement platform for the Indian market.
 
 **Connecting Talent. Creating Possibilities.**
 
-This is a Next.js App Router project with a complete public website and role-based dashboards (candidate, employer, recruiter, admin). Interactions run against typed demo data stored in the browser. Prisma schema is included for a later PostgreSQL backend.
+Next.js App Router app with PostgreSQL (Prisma), role-based auth, private resume storage, Razorpay employer packages, articles CMS, resume parsing, and DPDP deletion workflows.
 
-## Run locally
+## Prerequisites
+
+- Node.js 20+
+- PostgreSQL 16+ (Homebrew, Docker Compose, or hosted)
+
+## Setup
 
 ```bash
-cd ~/Desktop/Hireora
+cd ~/Desktop/Hireora\ Consultancy
+cp .env.example .env
+# Set DATABASE_URL + AUTH_SECRET
+# Production: NEXT_PUBLIC_APP_URL=https://hireora.in
+
 npm install
+npm run db:generate
+npm run db:push          # or: npm run db:migrate
+npm run db:seed
 npm run dev
 ```
 
@@ -27,19 +39,31 @@ Password for all seeded accounts: `demo123`
 | Recruiter | recruiter@hireora.demo |
 | Admin | admin@hireora.demo |
 
-You can also click the role cards on `/login`. Registration uses demo OTP `123456`.
+OTP default: `123456` (`OTP_DEV_CODE`) when Resend is unset.
 
-## What works now
+## Production deploy (AWS / VPS + HTTPS)
 
-- Public marketing site, job search, apply/save, contact and hiring-requirement forms
-- Role-based demo authentication and route protection
-- Candidate profile, applications timeline, interviews
-- Employer job create/manage, application actions, interview scheduling
-- Recruiter CRM, duplicate flags, drag-and-drop pipeline
-- Admin moderation, demo charts, settings toggles
+```bash
+export DATABASE_URL="postgresql://..."
+export AUTH_SECRET="$(openssl rand -base64 32)"
+export NEXT_PUBLIC_APP_URL="https://hireora.in"
+# optional: RESEND_*, TWILIO_*, RAZORPAY_*, S3_*, OPENAI_API_KEY
 
-## Later
+./scripts/deploy-production.sh ubuntu@YOUR_EC2_HOST
+```
 
-PostgreSQL + Prisma client, real OTP/email/WhatsApp, private resume storage, payments, and live AI parsing. Those surfaces are labelled in the UI.
+This builds the Next standalone output, uploads it, installs **systemd** + **Caddy** (auto HTTPS), and points `hireora.in` at the Node server on `:3000`.
 
-See `PRODUCT.md` for the full product spec.
+DNS A record for `hireora.in` must point at the server before Caddy can issue certificates.
+
+## Useful scripts
+
+| Script | Purpose |
+| --- | --- |
+| `npm run db:up` | Docker Compose Postgres |
+| `npm run db:generate` | Prisma client |
+| `npm run db:push` / `db:migrate` | Schema |
+| `npm run db:seed` | Seed data + CMS articles |
+| `./scripts/deploy-production.sh` | Build + remote HTTPS deploy |
+
+See `PRODUCT.md` and `.env.example` for providers.

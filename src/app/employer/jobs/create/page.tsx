@@ -22,6 +22,8 @@ export default function CreateJobPage() {
     department: "",
     category: "IT & Software",
     description: "",
+    responsibilities: "",
+    requirements: "",
     skills: "React, TypeScript",
     location: "Bengaluru",
     employmentType: "Full-time" as EmploymentType,
@@ -34,6 +36,13 @@ export default function CreateJobPage() {
     deadline: "2026-12-31",
   });
 
+  function lines(value: string) {
+    return value
+      .split("\n")
+      .map((line) => line.replace(/^[-•*\d.)\s]+/, "").trim())
+      .filter(Boolean);
+  }
+
   return (
     <div className="max-w-3xl">
       <PageHeader title="Post a job" description="New vacancies go to admin for approval in this demo." />
@@ -41,12 +50,29 @@ export default function CreateJobPage() {
         className="space-y-5 rounded-[1.85rem] bg-white p-7 shadow-soft"
         onSubmit={(e) => {
           e.preventDefault();
+          if (!companyId) return;
           createJob({
-            ...form,
+            title: form.title,
+            department: form.department,
+            category: form.category,
+            description: form.description,
             companyId,
-            skills: form.skills.split(",").map((s) => s.trim()),
-            responsibilities: ["To be refined with hiring manager"],
-            requirements: ["See skills and experience range"],
+            skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+            responsibilities: lines(form.responsibilities).length
+              ? lines(form.responsibilities)
+              : ["Own day-to-day delivery for this role"],
+            requirements: lines(form.requirements).length
+              ? lines(form.requirements)
+              : [`${form.experienceMin}+ years relevant experience`],
+            location: form.location,
+            employmentType: form.employmentType,
+            workMode: form.workMode,
+            experienceMin: form.experienceMin,
+            experienceMax: form.experienceMax,
+            salaryMin: form.salaryMin,
+            salaryMax: form.salaryMax,
+            openings: form.openings,
+            deadline: form.deadline,
           });
           router.push("/employer/jobs");
         }}
@@ -79,6 +105,20 @@ export default function CreateJobPage() {
         </div>
         <Field label="Job description">
           <Textarea required placeholder="What this person will own" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+        </Field>
+        <Field label="Responsibilities (one per line)">
+          <Textarea
+            placeholder={"Ship weekly product improvements\nPartner with design and engineering\nMentor junior teammates"}
+            value={form.responsibilities}
+            onChange={(e) => setForm({ ...form, responsibilities: e.target.value })}
+          />
+        </Field>
+        <Field label="Requirements (one per line)">
+          <Textarea
+            placeholder={"3+ years in a similar role\nStrong written communication\nPortfolio or case studies"}
+            value={form.requirements}
+            onChange={(e) => setForm({ ...form, requirements: e.target.value })}
+          />
         </Field>
         <Field label="Required skills">
           <Input placeholder="Required skills" value={form.skills} onChange={(e) => setForm({ ...form, skills: e.target.value })} />

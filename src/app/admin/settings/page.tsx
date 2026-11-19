@@ -9,8 +9,6 @@ import { Switch } from "@/components/ui/switch";
 import { CATEGORIES } from "@/lib/constants";
 import { testimonials } from "@/lib/demo/seed";
 
-const SETTINGS_KEY = "hireora.admin.settings.v1";
-
 type SettingsState = {
   emailUpdates: boolean;
   whatsappReminders: boolean;
@@ -23,24 +21,33 @@ const defaults: SettingsState = {
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<SettingsState>(defaults);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return;
-    try {
-      setSettings({ ...defaults, ...JSON.parse(raw) });
-    } catch {
-      setSettings(defaults);
-    }
+    fetch("/api/bootstrap")
+      .then((res) => res.json())
+      .then((data) => {
+        setSettings({
+          emailUpdates: Boolean(data.settings?.emailUpdates ?? true),
+          whatsappReminders: Boolean(data.settings?.whatsappReminders ?? false),
+        });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  function update(patch: Partial<SettingsState>) {
-    setSettings((prev) => {
-      const next = { ...prev, ...patch };
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
-      toast.success("Settings saved in this browser");
-      return next;
+  async function update(patch: Partial<SettingsState>) {
+    const next = { ...settings, ...patch };
+    setSettings(next);
+    const res = await fetch("/api/actions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "updateSettings", payload: next }),
     });
+    if (!res.ok) {
+      toast.error("Could not save settings");
+      return;
+    }
+    toast.success("Settings saved");
   }
 
   return (
@@ -54,13 +61,23 @@ export default function AdminSettingsPage() {
         <div className="mt-5 space-y-4 text-sm">
           <label className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f8fb] px-4 py-3">
             Email application updates
-            <Switch checked={settings.emailUpdates} onCheckedChange={(emailUpdates) => update({ emailUpdates })} />
+            <Switch
+              checked={settings.emailUpdates}
+              disabled={loading}
+              onCheckedChange={(emailUpdates) => void update({ emailUpdates })}
+            />
           </label>
           <label className="flex items-center justify-between gap-4 rounded-2xl bg-[#f7f8fb] px-4 py-3">
             WhatsApp interview reminders
-            <Switch checked={settings.whatsappReminders} onCheckedChange={(whatsappReminders) => update({ whatsappReminders })} />
+            <Switch
+              checked={settings.whatsappReminders}
+              disabled={loading}
+              onCheckedChange={(whatsappReminders) => void update({ whatsappReminders })}
+            />
           </label>
-          <p className="text-xs text-muted-foreground">Providers are not connected. Toggles persist in this browser only.</p>
+          <p className="text-xs text-muted-foreground">
+            Flags are stored in PostgreSQL. Email uses Resend when configured; WhatsApp uses Twilio. Otherwise events log to the server console.
+          </p>
         </div>
       </section>
       <section className="rounded-[1.85rem] bg-white p-7 shadow-soft">

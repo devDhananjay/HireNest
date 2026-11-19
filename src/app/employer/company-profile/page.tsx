@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useDemo } from "@/lib/store";
 
+const LOGO_COLORS = ["#111111", "#101D35", "#3157D5", "#F4A340", "#0F766E", "#7C2D12"];
+
 export default function CompanyProfilePage() {
   const { session, companies, updateCompany } = useDemo();
   const company = companies.find((item) => item.id === session?.companyId) ?? companies[0];
@@ -21,6 +23,7 @@ export default function CompanyProfilePage() {
     website: company?.website ?? "",
     about: company?.about ?? "",
     employees: company?.employees ?? "",
+    logoColor: company?.logoColor ?? "#111111",
   });
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function CompanyProfilePage() {
       website: company.website,
       about: company.about,
       employees: company.employees,
+      logoColor: company.logoColor,
     });
   }, [company]);
 
@@ -43,7 +47,7 @@ export default function CompanyProfilePage() {
       <div className="grid items-start gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="space-y-5">
           <div className="rounded-[1.85rem] bg-black p-7 text-white shadow-lift">
-            <CompanyMark name={form.name || company.name} color="#ffffff" size="lg" className="ring-white/10" />
+            <CompanyMark name={form.name || company.name} color={form.logoColor} size="lg" className="ring-white/10" />
             <h2 className="mt-5 font-heading text-2xl font-semibold">{form.name || company.name}</h2>
             <p className="mt-2 text-sm text-white/55">
               {form.industry} · {form.location}
@@ -89,7 +93,30 @@ export default function CompanyProfilePage() {
           <Field label="About">
             <Textarea value={form.about} onChange={(e) => setForm({ ...form, about: e.target.value })} />
           </Field>
-          <p className="text-xs text-muted-foreground">Logo upload is local-only in this demo. Production will use private object storage.</p>
+          <Field label="Logo mark colour">
+            <div className="flex flex-wrap items-center gap-2">
+              {LOGO_COLORS.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  aria-label={`Use logo colour ${color}`}
+                  onClick={() => setForm({ ...form, logoColor: color })}
+                  className="size-9 rounded-full ring-2 ring-offset-2 transition"
+                  style={{
+                    background: color,
+                    boxShadow: form.logoColor === color ? "0 0 0 2px #111" : undefined,
+                  }}
+                />
+              ))}
+              <Input
+                type="color"
+                value={form.logoColor}
+                onChange={(e) => setForm({ ...form, logoColor: e.target.value })}
+                className="h-11 w-16 cursor-pointer p-1"
+              />
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground">Demo uses a colour mark. Production will support private logo object storage.</p>
+          </Field>
           <Button type="submit" className="h-11 rounded-full">
             Save company profile
           </Button>

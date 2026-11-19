@@ -16,7 +16,7 @@ import { useDemo } from "@/lib/store";
 
 export default function CandidateDashboard() {
   const router = useRouter();
-  const { session, candidateByUserId, jobs, updateCandidate } = useDemo();
+  const { session, candidateByUserId, jobs, uploadResume } = useDemo();
   const candidate = session ? candidateByUserId(session.id) : undefined;
   const [search, setSearch] = useState({ q: "", location: "", experience: "", type: "" });
   const [industry, setIndustry] = useState("");
@@ -90,7 +90,10 @@ export default function CandidateDashboard() {
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file && candidate) updateCandidate(candidate.id, { resumeName: file.name });
+                  if (!file || !candidate) return;
+                  void uploadResume(file).then(() => {
+                    toast.success("CV saved. Matches now use your profile.");
+                  });
                 }}
               />
             </label>
@@ -98,7 +101,11 @@ export default function CandidateDashboard() {
               type="button"
               className="mt-5 h-11 w-full rounded-full"
               onClick={() => {
-                toast.success(candidate?.resumeName ? "Matches refreshed from your CV." : "Upload a CV for tighter matches.");
+                if (!candidate?.resumeName) {
+                  toast.message("Upload a CV first for tighter matches.");
+                  return;
+                }
+                toast.success(`${recommended.length} roles ranked from your profile skills and preferences.`);
                 document.getElementById("matches")?.scrollIntoView({ behavior: "smooth", block: "start" });
               }}
             >

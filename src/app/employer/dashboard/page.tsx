@@ -1,19 +1,59 @@
 "use client";
 
 import Link from "next/link";
-import { Briefcase, Users, Calendar, LineChart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Briefcase, Users, Calendar, LineChart, CreditCard } from "lucide-react";
+import { toast } from "sonner";
 import { CompanyMark } from "@/components/jobs/company-mark";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { btnPrimary } from "@/lib/ui";
 import { useDemo } from "@/lib/store";
+
+type Invoice = {
+  id: string;
+  amount: number;
+  status: string;
+  packageName: string;
+  razorpayOrderId: string | null;
+  issuedAt: string;
+};
 
 export default function EmployerDashboard() {
   const { session, jobs, applications, interviews, companies, candidates } = useDemo();
   const companyId = session?.companyId ?? companies[0]?.id;
   const mine = jobs.filter((job) => job.companyId === companyId);
   const apps = applications.filter((app) => mine.some((job) => job.id === app.jobId));
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+
+  async function loadInvoices() {
+    const res = await fetch("/api/payments/invoices");
+    if (!res.ok) return;
+    const data = await res.json();
+    setInvoices(data.invoices ?? []);
+  }
+
+  useEffect(() => {
+    void loadInvoices();
+  }, []);
+
+  async function buyPackage(packageId: string) {
+    const res = await fetch("/api/payments/razorpay/order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ packageId, companyId }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      toast.error(data.error || "Could not create order");
+      return;
+    }
+    toast.success(data.mock ? "Mock Razorpay order created" : "Razorpay order created");
+    await loadInvoices();
+  }
+
   return (
     <div>
       <PageHeader
@@ -78,6 +118,35 @@ export default function EmployerDashboard() {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      <div className="mt-8 rounded-[1.85rem] bg-white p-6 shadow-soft">
+        <div className="mb-4 flex items-center gap-3">
+          <CreditCard className="size-4" />
+          <h2 className="font-heading text-lg font-semibold">Job packages · Razorpay</h2>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Button className="h-11 rounded-full" onClick={() => void buyPackage("starter")}>
+            Starter · ₹14,999
+          </Button>
+          <Button variant="outline" className="h-11 rounded-full" onClick={() => void buyPackage("growth")}>
+            Growth · ₹49,999
+          </Button>
+          <Button variant="outline" className="h-11 rounded-full" onClick={() => void buyPackage("enterprise")}>
+            Enterprise · ₹1,49,999
+          </Button>
+        </div>
+        <div className="mt-5 space-y-2">
+          {invoices.slice(0, 4).map((invoice) => (
+            <div key={invoice.id} className="flex items-center justify-between rounded-2xl bg-[#f7f8fb] px-4 py-3 text-sm">
+              <span>
+                {invoice.packageName} · ₹{(invoice.amount / 100).toLocaleString("en-IN")}
+              </span>
+              <Badge variant="outline">{invoice.status}</Badge>
+            </div>
+          ))}
+          {!invoices.length ? <p className="text-sm text-muted-foreground">No invoices yet.</p> : null}
         </div>
       </div>
     </div>

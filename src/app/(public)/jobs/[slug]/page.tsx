@@ -56,7 +56,15 @@ export default function JobDetailPage({ params }: { params: Promise<{ slug: stri
         <div className="flex items-start gap-4">
           <CompanyMark name={company?.name ?? "Co"} color={company?.logoColor ?? "#111111"} size="lg" />
           <div>
-            <p className="text-sm text-muted-foreground">{company?.name}</p>
+            <p className="text-sm text-muted-foreground">
+              {company ? (
+                <Link href={`/companies/${company.slug}`} className="hover:underline">
+                  {company.name}
+                </Link>
+              ) : (
+                "Company"
+              )}
+            </p>
             <h1 className="font-heading text-3xl font-semibold sm:text-4xl">{job.title}</h1>
             <div className="mt-3 flex flex-wrap gap-2 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-1">
@@ -123,8 +131,12 @@ export default function JobDetailPage({ params }: { params: Promise<{ slug: stri
         </div>
         {score ? (
           <div className="rounded-[1.85rem] bg-white p-5 shadow-soft">
-            <p className="text-sm text-muted-foreground">AI resume score · demo</p>
+            <p className="text-sm text-muted-foreground">Live fit model</p>
             <p className="mt-1 font-heading text-4xl font-semibold">{score.score}</p>
+            <p className="mt-3 text-sm">
+              Hire probability <strong>{match?.hireProbability ?? score.hireProbability}%</strong>
+              <span className="text-muted-foreground"> · confidence {match?.confidence ?? score.confidence}</span>
+            </p>
             <p className="mt-2 text-xs leading-5 text-muted-foreground">{score.disclaimer}</p>
             <div className="mt-4 space-y-3">
               {match?.factors.map((factor) => (

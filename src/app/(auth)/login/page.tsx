@@ -6,29 +6,35 @@ import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DEMO_ACCOUNTS, DEMO_PASSWORD, ROLE_HOME } from "@/lib/constants";
-import { users } from "@/lib/demo/seed";
 import { useDemo } from "@/lib/store";
 import type { SessionUser } from "@/lib/types";
 
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const { setSession, users: liveUsers } = useDemo();
+  const { setSession, refresh } = useDemo();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function enter(user: SessionUser) {
+  async function enter(loginEmail: string, loginPassword: string) {
     setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user),
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
       });
-      const data = (await res.json()) as { user: SessionUser };
+      const data = (await res.json()) as { user?: SessionUser; error?: string };
+      if (!res.ok || !data.user) {
+        setError(data.error || "Could not sign in.");
+        setLoading(false);
+        return;
+      }
       setSession(data.user);
+      await refresh();
       router.push(params.get("next") || ROLE_HOME[data.user.role]);
       router.refresh();
     } catch {
@@ -39,29 +45,30 @@ function LoginForm() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
-    const user =
-      liveUsers.find((item) => item.email.toLowerCase() === email.toLowerCase()) ??
-      users.find((item) => item.email.toLowerCase() === email.toLowerCase());
-    if (!user) {
-      setError("No demo account found for that email. Use a role card or register.");
+    if (!password) {
+      setError("Enter your password.");
       return;
     }
-    if (password && password !== DEMO_PASSWORD) {
-      setError(`Demo password is ${DEMO_PASSWORD}.`);
-      return;
-    }
-    await enter(user);
+    await enter(email, password);
   }
 
   return (
     <div>
       <p className="text-[12px] font-medium tracking-[0.16em] text-muted-foreground uppercase">Welcome back</p>
       <h1 className="mt-2 font-heading text-3xl font-semibold">Sign in to Hireora</h1>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">Role-based demo access. Pick a workspace or use a sample account.</p>
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        Role-based access backed by PostgreSQL. Seeded password is {DEMO_PASSWORD}.
+      </p>
       <form className="mt-8 space-y-3" onSubmit={onSubmit}>
         <Input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="h-12" />
-        <Input type="password" placeholder={`Password (${DEMO_PASSWORD})`} value={password} onChange={(e) => setPassword(e.target.value)} className="h-12" />
+        <Input
+          required
+          type="password"
+          placeholder={`Password (${DEMO_PASSWORD})`}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="h-12"
+        />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button type="submit" className="h-12 w-full rounded-full" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
@@ -73,10 +80,8 @@ function LoginForm() {
             key={account.email}
             variant="outline"
             className="h-12 justify-between rounded-full px-4"
-            onClick={() => {
-              const user = users.find((item) => item.email === account.email);
-              if (user) void enter(user);
-            }}
+            disabled={loading}
+            onClick={() => void enter(account.email, DEMO_PASSWORD)}
           >
             <span>{account.label}</span>
             <span className="text-xs text-muted-foreground">{account.email}</span>
@@ -84,8 +89,12 @@ function LoginForm() {
         ))}
       </div>
       <div className="mt-6 flex justify-between text-sm">
-        <Link href="/forgot-password" className="hover:underline">Forgot password</Link>
-        <Link href="/register" className="hover:underline">Create account</Link>
+        <Link href="/forgot-password" className="hover:underline">
+          Forgot password
+        </Link>
+        <Link href="/register" className="hover:underline">
+          Create account
+        </Link>
       </div>
     </div>
   );

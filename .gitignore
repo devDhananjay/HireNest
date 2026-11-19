@@ -34,6 +34,17 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local uploads + generated prisma client
+/uploads
+/src/generated
+
+# secrets & deploy artifacts (never commit)
+scripts/hireora-ic
+scripts/*.pem
+scripts/hireora-deploy.tgz
+*.pem
+.env.production
+
 # vercel
 .vercel
 

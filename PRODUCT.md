@@ -2,6 +2,7 @@
 
 Brand: **HIREORA**  
 Tagline: **Connecting Talent. Creating Possibilities.**  
+Site: `https://hireora.in`  
 Palette: Navy `#101D35`, Royal Blue `#3157D5`, Orange `#F4A340`, Soft White `#F8F9FC`, Charcoal `#202938`.
 
 ## Users
@@ -11,14 +12,21 @@ Palette: Navy `#101D35`, Royal Blue `#3157D5`, Orange `#F4A340`, Soft White `#F8
 - Recruiters / HR consultants
 - Platform administrators
 
-## Current scaffold
+## Platform
 
-The Next.js app implements the public website and all listed dashboard routes with working demo-data interactions.
+PostgreSQL + Prisma backend with JWT httpOnly sessions.
 
-Not yet wired: PostgreSQL, Prisma client, production OTP, email/WhatsApp providers, S3/R2, payments, DPDP deletion workflows.
+Wired:
 
-AI matching and resume scores are explainable demo scores, not hiring probabilities.
+- Auth (bcrypt, OTP register/reset)
+- Resume private storage (local or S3/R2) + AI/heuristic CV parsing
+- Live fit score + hire-probability model (decision support, not a guarantee)
+- Articles CMS (admin publish → public career library)
+- Email (Resend) / WhatsApp (Twilio) with console fallbacks
+- Razorpay employer packages
+- DPDP deletion request + admin fulfilment
+- Production deploy via `scripts/deploy-production.sh` + Caddy HTTPS
 
-## Monetization (later)
+## Monetization
 
-Employer job packages, featured listings, bulk hiring, executive search retainers, candidate career services. Candidate registration and basic applications stay free in the MVP.
+Employer job packages via Razorpay (`starter` / `growth` / `enterprise`). Candidate registration and basic applications stay free in the MVP.

@@ -6,11 +6,10 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { NativeSelect } from "@/components/ui/native-select";
-import { clients } from "@/lib/demo/seed";
 import { useDemo } from "@/lib/store";
 
 export default function RecruiterClientsPage() {
-  const { companies, leads, updateLeadStatus } = useDemo();
+  const { companies, leads, clients, updateLeadStatus } = useDemo();
   const openLeads = leads.filter((lead) => lead.status !== "Closed").length;
 
   return (

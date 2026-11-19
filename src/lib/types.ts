@@ -193,6 +193,7 @@ export type Article = {
   category: string;
   readTime: string;
   date: string;
+  body: string[];
 };
 
 export type Testimonial = {

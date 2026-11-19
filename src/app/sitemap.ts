@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
-import { jobs } from "@/lib/demo/seed";
+import { BRAND } from "@/lib/constants";
+import { prisma } from "@/lib/server/prisma";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://hireora.example";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = BRAND.siteUrl;
   const staticRoutes = [
     "",
     "/jobs",
@@ -19,10 +20,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/privacy-policy",
     "/terms",
   ];
+
+  const [companies, jobs, articleRows] = await Promise.all([
+    prisma.company.findMany({ select: { slug: true } }),
+    prisma.job.findMany({ where: { status: "active" }, select: { slug: true, postedAt: true } }),
+    prisma.article.findMany({ where: { published: true }, select: { slug: true, publishedAt: true } }),
+  ]);
+
   return [
     ...staticRoutes.map((route) => ({ url: `${base}${route}`, lastModified: new Date() })),
-    ...jobs
-      .filter((job) => job.status === "active")
-      .map((job) => ({ url: `${base}/jobs/${job.slug}`, lastModified: new Date(job.postedAt) })),
+    ...companies.map((company) => ({ url: `${base}/companies/${company.slug}`, lastModified: new Date() })),
+    ...articleRows.map((article) => ({
+      url: `${base}/career-resources/${article.slug}`,
+      lastModified: article.publishedAt,
+    })),
+    ...jobs.map((job) => ({ url: `${base}/jobs/${job.slug}`, lastModified: job.postedAt })),
   ];
 }

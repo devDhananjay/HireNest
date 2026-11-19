@@ -1,0 +1,15 @@
+[Unit]
+Description=HIREORA Next.js
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/hireora
+EnvironmentFile=/opt/hireora/.env.production
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

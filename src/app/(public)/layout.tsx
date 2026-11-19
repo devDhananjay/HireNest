@@ -7,7 +7,7 @@ const jsonLd = {
   "@type": "Organization",
   name: BRAND.name,
   slogan: BRAND.tagline,
-  url: "https://hireora.example",
+  url: BRAND.siteUrl,
   email: BRAND.email,
   telephone: BRAND.phone,
   address: {

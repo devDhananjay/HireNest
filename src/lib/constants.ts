@@ -7,6 +7,7 @@ export const BRAND = {
   phone: "+91 98765 43210",
   whatsapp: "919876543210",
   address: "WeWork Galaxy, 43, Residency Road, Bengaluru, Karnataka 560025",
+  siteUrl: (process.env.NEXT_PUBLIC_APP_URL || "https://hireora.in").replace(/\/$/, ""),
 };
 
 export const CATEGORIES = [

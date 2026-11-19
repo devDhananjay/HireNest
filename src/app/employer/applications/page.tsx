@@ -105,13 +105,19 @@ export default function EmployerApplicationsPage() {
                 >
                   Schedule interview
                 </Button>
-                <a
-                  className="inline-flex h-11 items-center rounded-full bg-white px-4 text-sm shadow-soft"
-                  href={`data:text/plain,${encodeURIComponent(candidate?.resumeName ?? "resume")}`}
-                  download={candidate?.resumeName ?? "resume.txt"}
-                >
-                  Download resume
-                </a>
+                {candidate?.resumeUrl ? (
+                  <a
+                    className="inline-flex h-11 items-center rounded-full bg-white px-4 text-sm shadow-soft"
+                    href={candidate.resumeUrl}
+                    download={candidate.resumeName || "resume"}
+                  >
+                    Download resume
+                  </a>
+                ) : (
+                  <span className="inline-flex h-11 items-center rounded-full bg-white/70 px-4 text-sm text-muted-foreground shadow-soft">
+                    {candidate?.resumeName ? `${candidate.resumeName} · re-upload for download` : "No resume on file"}
+                  </span>
+                )}
               </div>
             </article>
           );

@@ -19,21 +19,21 @@ export default function CompaniesPage() {
           const count = jobs.filter((job) => job.companyId === company.id && job.status === "active").length;
           return (
             <article key={company.id} className="hover-lift rounded-[1.85rem] bg-white p-6 shadow-soft">
-              <div className="flex items-start gap-4">
-                <CompanyMark name={company.name} color={company.logoColor} />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="font-heading text-xl font-semibold">{company.name}</h2>
-                    {company.verified ? <Badge>Verified</Badge> : <Badge variant="outline">Pending</Badge>}
+              <Link href={`/companies/${company.slug}`} className="block">
+                <div className="flex items-start gap-4">
+                  <CompanyMark name={company.name} color={company.logoColor} />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-heading text-xl font-semibold">{company.name}</h2>
+                      {company.verified ? <Badge>Verified</Badge> : <Badge variant="outline">Pending</Badge>}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {company.industry} · {company.location} · {company.employees}
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {company.industry} · {company.location} · {company.employees}
-                  </p>
                 </div>
-              </div>
-              <p className="mt-4 text-sm leading-6 text-muted-foreground">{company.about}</p>
-              <Link href={`/jobs?q=${encodeURIComponent(company.name)}`} className="mt-4 inline-block text-sm font-medium hover:underline">
-                {count} open roles
+                <p className="mt-4 text-sm leading-6 text-muted-foreground">{company.about}</p>
+                <span className="mt-4 inline-block text-sm font-medium hover:underline">{count} open roles</span>
               </Link>
             </article>
           );

@@ -869,6 +869,12 @@ export const articles: Article[] = [
     category: "Career",
     readTime: "6 min",
     date: "2026-10-12",
+    body: [
+      "Indian offers usually break into fixed pay, variable incentive, and sometimes ESOPs or joining bonuses. Before you negotiate, write down your monthly take-home need, notice buyout, and relocation costs.",
+      "Ask for the full CTC sheet in writing. Compare fixed vs variable, probation terms, and clawbacks. A slightly lower fixed with strong variable only works if the targets are realistic for your role.",
+      "When you counter, lead with one clear ask: a higher fixed band, a joining bonus, or an earlier review. Recruiters respond better to a single, reasoned request than a laundry list.",
+      "If the company cannot move on cash, ask for learning budget, hybrid days, or a six-month salary review. Close politely even if you decline — Indian hiring circles are smaller than they look.",
+    ],
   },
   {
     slug: "hiring-in-delhi-ncr-2026",
@@ -877,6 +883,12 @@ export const articles: Article[] = [
     category: "Insights",
     readTime: "8 min",
     date: "2026-10-28",
+    body: [
+      "Delhi NCR continues to hire across GCC hubs in Gurugram, fintech and payments teams in Noida, and retail leadership roles tied to North India expansion.",
+      "Employers are prioritising bilingual customer ops, mid-level product analytics, and compliance talent who understand RBI and data localisation expectations.",
+      "Compensation bands have widened for scarce skills, but volume hiring in support and store roles still rewards speed-to-shortlist over perfect profiles.",
+      "For agencies and in-house TA, the winning pattern is role scorecards, three-day first screens, and clear feedback loops — candidates drop off fast in the NCR market.",
+    ],
   },
   {
     slug: "fresher-jobs-that-build-careers",
@@ -885,6 +897,12 @@ export const articles: Article[] = [
     category: "Freshers",
     readTime: "5 min",
     date: "2026-11-02",
+    body: [
+      "Brand names matter less than what you will own in year one. Prefer roles with a named mentor, measurable output, and exposure to customers or production systems.",
+      "Graduate programmes in consulting, product support, and engineering rotations can compound quickly if you document projects and ask for stretch assignments every quarter.",
+      "Avoid offers that are pure training with no placement clarity. Ask who hired last year’s cohort and into which teams.",
+      "Build a simple portfolio: coursework projects, internships, GitHub or case write-ups, and a one-page story of a problem you solved. That package beats a generic CV on HIREORA shortlists.",
+    ],
   },
 ];
 

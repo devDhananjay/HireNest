@@ -1,26 +1,40 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, GraduationCap, LineChart } from "lucide-react";
-import { IconOrb } from "@/components/brand/icon-orb";
-import { articles } from "@/lib/demo/seed";
+import type { Article } from "@/lib/types";
 
 export default function CareerResourcesPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
+
+  useEffect(() => {
+    fetch("/api/articles")
+      .then((res) => res.json())
+      .then((data) => setArticles(data.articles ?? []))
+      .catch(() => setArticles([]));
+  }, []);
+
   return (
-    <div className="container-shell py-16">
-      <p className="text-[12px] font-medium tracking-[0.16em] text-muted-foreground uppercase">Guides</p>
+    <div className="container-shell py-12">
+      <p className="text-[12px] font-medium tracking-[0.16em] text-muted-foreground uppercase">Library</p>
       <h1 className="mt-2 font-heading text-4xl font-semibold sm:text-5xl">Career resources</h1>
-      <p className="mt-2 text-muted-foreground">Guides for Indian job seekers and hiring managers. Demo articles.</p>
-      <div className="mt-12 grid gap-6 md:grid-cols-3">
-        {articles.map((article) => {
-          const icon = article.category === "Career" ? BookOpen : article.category === "Insights" ? LineChart : GraduationCap;
-          return (
-            <Link key={article.slug} href={`/career-resources/${article.slug}`} className="hover-lift rounded-[1.85rem] bg-white p-7 shadow-soft">
-              <IconOrb icon={icon} />
-              <p className="mt-5 text-[11px] font-medium tracking-[0.16em] text-muted-foreground uppercase">{article.category}</p>
-              <h2 className="mt-3 font-heading text-xl font-semibold">{article.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{article.excerpt}</p>
-            </Link>
-          );
-        })}
+      <p className="mt-2 text-muted-foreground">Guides for Indian job seekers and hiring managers. Managed in the CMS.</p>
+      <div className="mt-10 grid gap-5 md:grid-cols-2">
+        {articles.map((article) => (
+          <Link
+            key={article.slug}
+            href={`/career-resources/${article.slug}`}
+            className="hover-lift rounded-[1.85rem] bg-white p-6 shadow-soft"
+          >
+            <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">{article.category}</p>
+            <h2 className="mt-2 font-heading text-xl font-semibold">{article.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">{article.excerpt}</p>
+            <p className="mt-4 text-xs text-muted-foreground">
+              {article.date} · {article.readTime}
+            </p>
+          </Link>
+        ))}
+        {!articles.length ? <p className="text-sm text-muted-foreground">No published articles yet.</p> : null}
       </div>
     </div>
   );

@@ -1,32 +1,41 @@
 import { NextResponse } from "next/server";
-import { users } from "@/lib/demo/seed";
-import { SESSION_COOKIE } from "@/lib/session";
-import type { SessionUser, UserRole } from "@/lib/types";
+import { DEMO_PASSWORD } from "@/lib/constants";
+import {
+  setSessionCookie,
+  signSessionToken,
+  toSessionUser,
+  verifyPassword,
+} from "@/lib/server/auth";
+import { prisma } from "@/lib/server/prisma";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as Partial<SessionUser> & { password?: string };
-  const existing = users.find(
-    (user) => user.email.toLowerCase() === body.email?.toLowerCase(),
-  );
-
-  const user: SessionUser = existing ?? {
-    id: body.id ?? `u-${crypto.randomUUID().slice(0, 8)}`,
-    name: body.name ?? "HIREORA User",
-    email: body.email ?? "",
-    role: (body.role as UserRole) ?? "candidate",
-    companyId: body.companyId,
-  };
-
-  if (!user.email) {
-    return NextResponse.json({ error: "Email is required" }, { status: 400 });
+  const body = (await request.json()) as { email?: string; password?: string };
+  const email = body.email?.trim().toLowerCase();
+  if (!email || !body.password) {
+    return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
   }
 
-  const response = NextResponse.json({ user });
-  response.cookies.set(SESSION_COOKIE, JSON.stringify(user), {
-    path: "/",
-    httpOnly: false,
-    sameSite: "lax",
-    maxAge: 60 * 60 * 24 * 7,
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { employer: true },
   });
-  return response;
+  if (!user || user.disabled) {
+    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
+  }
+
+  const ok = await verifyPassword(body.password, user.passwordHash);
+  if (!ok) {
+    return NextResponse.json(
+      { error: `Invalid email or password. Seeded accounts use ${DEMO_PASSWORD}.` },
+      { status: 401 },
+    );
+  }
+
+  const session = await toSessionUser(user.id);
+  if (!session) {
+    return NextResponse.json({ error: "Unable to create session" }, { status: 500 });
+  }
+  const token = await signSessionToken(session);
+  const response = NextResponse.json({ user: session });
+  return setSessionCookie(response, token);
 }
